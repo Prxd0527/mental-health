@@ -37,4 +37,19 @@ public interface QuizService extends IService<Quiz> {
      * 获取用户的测评历史记录
      */
     List<QuizResult> getUserQuizHistory(Long userId);
+
+    /**
+     * 获取指定问卷的题目列表（管理端调用别名）
+     */
+    List<Question> getQuestions(Long quizId);
+
+    /**
+     * 新增/更新题目
+     */
+    void saveOrUpdateQuestion(Question question);
+
+    /**
+     * 删除题目
+     */
+    void removeQuestionById(Long questionId);
 }

@@ -98,4 +98,23 @@ public class QuizServiceImpl extends ServiceImpl<QuizMapper, Quiz> implements Qu
 
         return list;
     }
+
+    @Override
+    public List<Question> getQuestions(Long quizId) {
+        return getQuestionsByQuizId(quizId);
+    }
+
+    @Override
+    public void saveOrUpdateQuestion(Question question) {
+        if (question.getId() != null) {
+            questionMapper.updateById(question);
+        } else {
+            questionMapper.insert(question);
+        }
+    }
+
+    @Override
+    public void removeQuestionById(Long questionId) {
+        questionMapper.deleteById(questionId);
+    }
 }

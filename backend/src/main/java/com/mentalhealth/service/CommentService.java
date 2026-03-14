@@ -1,5 +1,6 @@
 package com.mentalhealth.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.mentalhealth.entity.Comment;
 
@@ -20,6 +21,11 @@ public interface CommentService extends IService<Comment> {
      * @param postId 树洞ID
      */
     List<Comment> getCommentsByPostId(Long postId);
+
+    /**
+     * 获取指定树洞的评论列表（分页，附带用户脱敏信息）
+     */
+    Page<Comment> getCommentsByPostIdPaged(Long postId, int pageNum, int pageSize);
 
     /**
      * 评论点赞

@@ -1,10 +1,11 @@
 package com.mentalhealth.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mentalhealth.common.Result;
 import com.mentalhealth.entity.Comment;
 import com.mentalhealth.service.CommentService;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import com.mentalhealth.utils.SecurityUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -17,27 +18,47 @@ public class CommentController {
     @Resource
     private CommentService commentService;
 
+    /**
+     * 发布评论（需登录，自动 DFA 过滤）
+     */
     @PostMapping("/publish")
     public Result<String> publishComment(@RequestBody Comment comment) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null)
             return Result.error(401, "尚未登录");
-        }
-        Long userId = (Long) auth.getPrincipal();
-        comment.setUserId(userId);
 
+        comment.setUserId(userId);
         if (commentService.publishComment(comment)) {
             return Result.success("评论成功");
         }
         return Result.error("评论失败");
     }
 
+    /**
+     * 获取指定树洞的评论列表（支持分页）
+     */
     @GetMapping("/list/{postId}")
-    public Result<List<Comment>> getComments(@PathVariable Long postId) {
+    public Result<Page<Comment>> getComments(
+            @PathVariable Long postId,
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "20") int pageSize) {
+
+        Page<Comment> page = commentService.getCommentsByPostIdPaged(postId, pageNum, pageSize);
+        return Result.success(page);
+    }
+
+    /**
+     * 获取指定树洞的全部评论（兼容旧接口，不分页）
+     */
+    @GetMapping("/all/{postId}")
+    public Result<List<Comment>> getAllComments(@PathVariable Long postId) {
         List<Comment> comments = commentService.getCommentsByPostId(postId);
         return Result.success(comments);
     }
 
+    /**
+     * 评论点赞
+     */
     @PostMapping("/{id}/like")
     public Result<String> likeComment(@PathVariable Long id) {
         if (commentService.likeComment(id)) {

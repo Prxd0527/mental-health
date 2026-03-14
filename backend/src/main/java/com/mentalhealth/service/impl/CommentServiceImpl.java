@@ -2,6 +2,7 @@ package com.mentalhealth.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mentalhealth.entity.Comment;
 import com.mentalhealth.entity.User;
@@ -59,6 +60,21 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             fillAuthorInfo(comment);
         }
         return list;
+    }
+
+    @Override
+    public Page<Comment> getCommentsByPostIdPaged(Long postId, int pageNum, int pageSize) {
+        Page<Comment> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Comment::getPostId, postId)
+                .eq(Comment::getStatus, 1)
+                .orderByAsc(Comment::getCreateTime);
+
+        Page<Comment> resultPage = baseMapper.selectPage(page, wrapper);
+        for (Comment comment : resultPage.getRecords()) {
+            fillAuthorInfo(comment);
+        }
+        return resultPage;
     }
 
     @Override
