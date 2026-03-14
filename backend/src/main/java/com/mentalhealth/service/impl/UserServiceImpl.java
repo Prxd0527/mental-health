@@ -28,7 +28,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new RuntimeException("用户名和密码不能为空");
         }
 
-        // 检查用户名是否已存在
         Long count = baseMapper.selectCount(new LambdaQueryWrapper<User>().eq(User::getUsername, username));
         if (count > 0) {
             throw new RuntimeException("学号/邮箱已被注册");
@@ -36,14 +35,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         User user = new User();
         user.setUsername(username);
-        // BCrypt加密存储
         user.setPassword(passwordEncoder.encode(password));
-        user.setRole("STUDENT"); // 默认注册为学生
-        user.setStatus(1); // 默认正常状态
+        user.setRole("STUDENT");
+        user.setStatus(1);
 
         baseMapper.insert(user);
 
-        // 脱敏返回
         user.setPassword(null);
         return user;
     }
@@ -76,10 +73,69 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         wrapper.eq(User::getRole, "TEACHER")
                 .eq(User::getStatus, 1);
         List<User> teachers = baseMapper.selectList(wrapper);
-        // 脱敏返回密码
         for (User t : teachers) {
             t.setPassword(null);
         }
         return teachers;
+    }
+
+    @Override
+    public User getUserProfile(Long userId) {
+        User user = baseMapper.selectById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        user.setPassword(null);
+        return user;
+    }
+
+    @Override
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
+        if (StrUtil.hasBlank(oldPassword, newPassword)) {
+            throw new RuntimeException("旧密码和新密码不能为空");
+        }
+
+        if (newPassword.length() < 6) {
+            throw new RuntimeException("新密码长度不能少于6位");
+        }
+
+        User user = baseMapper.selectById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("旧密码不正确");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        baseMapper.updateById(user);
+    }
+
+    @Override
+    public void updateProfile(Long userId, User profileData) {
+        User user = baseMapper.selectById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        // 只允许更新部分字段（防止前端传入恶意字段如 role/status 被覆盖）
+        if (StrUtil.isNotBlank(profileData.getRealName())) {
+            user.setRealName(profileData.getRealName());
+        }
+        if (StrUtil.isNotBlank(profileData.getAvatar())) {
+            user.setAvatar(profileData.getAvatar());
+        }
+        if (profileData.getGender() != null) {
+            user.setGender(profileData.getGender());
+        }
+        if (StrUtil.isNotBlank(profileData.getIntro())) {
+            user.setIntro(profileData.getIntro());
+        }
+        if (StrUtil.isNotBlank(profileData.getEmail())) {
+            user.setEmail(profileData.getEmail());
+        }
+
+        baseMapper.updateById(user);
     }
 }

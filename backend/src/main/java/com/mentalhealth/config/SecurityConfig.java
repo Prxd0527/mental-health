@@ -48,6 +48,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 // 放行 WebSocket 握手端点
                 .antMatchers("/ws/**").permitAll()
+                // 放行上传文件的静态资源访问
+                .antMatchers("/uploads/**").permitAll()
+                // 放行评论列表公开查看
+                .antMatchers("/api/comment/list/**").permitAll()
                 // 放行前端静态资源和Swagger文档(视情况拓展)
                 .antMatchers(
                         "/v2/api-docs",

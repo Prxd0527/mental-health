@@ -1,11 +1,11 @@
 package com.mentalhealth.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mentalhealth.common.Result;
 import com.mentalhealth.entity.Post;
 import com.mentalhealth.service.PostService;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import com.mentalhealth.utils.SecurityUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -30,15 +30,11 @@ public class PostController {
 
     @PostMapping("/publish")
     public Result<String> publish(@RequestBody Post post) {
-        // 从Spring Security上下文获取当前操作的用户ID
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null)
             return Result.error(401, "尚未登录");
-        }
-        // 注意：在 JwtAuthenticationFilter 我们将 userId 放到了 Principal 字段里
-        Long userId = (Long) auth.getPrincipal();
-        post.setUserId(userId);
 
+        post.setUserId(userId);
         if (postService.publishPost(post)) {
             return Result.success("发布成功");
         }
@@ -57,5 +53,48 @@ public class PostController {
             return Result.success("点赞成功");
         }
         return Result.error("点赞失败");
+    }
+
+    /**
+     * 我的树洞 - 查看当前用户发布的所有树洞（含已下架）
+     */
+    @GetMapping("/my")
+    public Result<Page<Post>> getMyPosts(
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize) {
+
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null)
+            return Result.error(401, "尚未登录");
+
+        Page<Post> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<Post> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Post::getUserId, userId)
+                .orderByDesc(Post::getCreateTime);
+
+        Page<Post> resultPage = postService.page(page, wrapper);
+        return Result.success(resultPage);
+    }
+
+    /**
+     * 删除自己的树洞（逻辑删除，将状态置为0）
+     */
+    @DeleteMapping("/{id}")
+    public Result<String> deletePost(@PathVariable Long id) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null)
+            return Result.error(401, "尚未登录");
+
+        Post post = postService.getById(id);
+        if (post == null) {
+            return Result.error("树洞不存在");
+        }
+        // 只允许本人或管理员删除
+        if (!post.getUserId().equals(userId) && !SecurityUtils.isAdmin()) {
+            return Result.error(403, "无权删除他人的树洞");
+        }
+        post.setStatus(0); // 逻辑删除
+        postService.updateById(post);
+        return Result.success("删除成功");
     }
 }
