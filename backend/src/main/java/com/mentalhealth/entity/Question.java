@@ -13,6 +13,7 @@ public class Question {
     private Long id;
 
     private Long quizId;
+    private String type; // SINGLE-单选, MULTI-多选
     private String content;
     private String options; // 格式 JSON, 如: [{"label":"A","text":"经常","score":3}, ...]
 

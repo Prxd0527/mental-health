@@ -31,6 +31,8 @@ public class AdminController {
     private PostService postService;
     @Resource
     private CommentService commentService;
+    @Resource
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     /**
      * 权限校验：非管理员直接拒绝
@@ -103,9 +105,8 @@ public class AdminController {
         User user = userService.getById(id);
         if (user == null)
             return Result.error("用户不存在");
-        // 使用 userService 的 changePassword 不合适（需要旧密码），直接操作
-        org.springframework.security.crypto.password.PasswordEncoder encoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
-        user.setPassword(encoder.encode("123456"));
+        // 使用注入的 PasswordEncoder（与 SecurityConfig 中定义的 Bean 一致）
+        user.setPassword(passwordEncoder.encode("123456"));
         userService.updateById(user);
         return Result.success("密码已重置为 123456");
     }

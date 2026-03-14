@@ -147,7 +147,34 @@
 |---|------|------|------|
 | A | 点赞操作（Post/Comment）直接 `setLikes(likes+1)` 后 updateById，高并发下存在竞态 | 低（项目属课程设计级别，并发极低） | 若后期流量放大可改用 `UPDATE SET likes = likes + 1` SQL |
 | B | IDE 报大量 "not on classpath" 警告 | 无（IDE 假阳性） | 项目配置 Java 1.8 但运行环境为 JRE 21，不影响 Maven 编译 |
-| C | 多个 Controller 中 `getCurrentUserId()` 方法重复 | 代码冗余 | 可后期抽取为 `BaseController` 或工具类 |
+| C | 多个 Controller 中 `getCurrentUserId()` 方法重复 | 代码冗余 | 已在 P1 阶段统一迁移到 `SecurityUtils` 工具类 |
+
+---
+
+> 第二次检查日期：2026-03-15 | P0+P1+P2 全量代码复查 | 审查 20+ 个文件
+
+### 🔴 编译/运行级缺陷（已修复 ✅）
+
+| # | 文件 | 问题描述 | 修复方案 |
+|---|------|---------|---------| 
+| 9 | `Question.java` | 实体缺少 `type` 字段，但 `init-data.sql` INSERT 语句含 `type` 列，会导致数据库操作时字段遗漏 | 补充 `private String type;` 字段 |
+| 10 | `Appointment.java` | 状态常量注释写 `CANCELED`，但 `AppointmentServiceImpl.cancelAppointment` 中使用 `CANCELLED`，大小写/拼写不一致 | 统一为 `CANCELLED` |
+
+### 🟡 安全/规范类问题（已修复 ✅）
+
+| # | 文件 | 问题描述 | 修复方案 |
+|---|------|---------|---------| 
+| 11 | `SecurityConfig.java` | 未放行 `/api/comment/tree/**` 和 `/api/comment/all/**`，匿名用户无法查看树形评论和全量评论 | 将三个评论公开端点合并放行 |
+| 12 | `AdminController.java` | `resetPassword()` 中 `new BCryptPasswordEncoder()` 违反 IoC 原则，与 SecurityConfig 中 Bean 不一致 | 改为 `@Resource` 注入 `PasswordEncoder` |
+
+### ⚠️ 建议改进项（暂不处理）
+
+| # | 描述 | 影响 | 建议 |
+|---|------|------|------|
+| D | WebSocket `/ws/chat/{userId}` 仅通过路径参数传入 userId，无 Token 校验，存在身份伪造风险 | 中（私聊场景需要安全保障） | 后期可在 `@OnOpen` 中从 Session 的 query 参数获取 JWT 并验证 |
+| E | `ChatMessageServiceImpl.getConversationList()` 全量查询所有相关消息后内存分组，数据量大时性能不佳 | 低（初期数据量小） | 后期可改为 SQL GROUP BY 子查询，直接在数据库层取每组最新一条 |
+| F | `CommentServiceImpl.getCommentsTree()` 中查找 replyToName 用 `stream().filter()` 遍历列表，O(n²) 复杂度 | 低（单帖评论量有限） | 可改为使用 map.get(parentId) 直接查找 |
+| G | `application.yml` 中 `mybatis-plus.configuration.log-impl` 使用 StdOutImpl 输出全部 SQL 日志 | 无（开发阶段有用） | 生产部署时应移除或改为 SLF4J |
 
 ## 相关文档索引
 

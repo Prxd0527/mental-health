@@ -23,7 +23,7 @@ public class Appointment {
     private String timeSlot; // 格式如 09:00-10:00
     private String requirement;
 
-    // PENDING-待审核, APPROVED-已同意, REJECTED-已拒绝, COMPLETED-已完成, CANCELED-已取消
+    // PENDING-待审核, APPROVED-已同意, REJECTED-已拒绝, COMPLETED-已完成, CANCELLED-已取消
     private String status;
     private String feedback; // 审批反馈/拒绝理由
 

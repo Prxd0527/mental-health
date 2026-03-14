@@ -50,8 +50,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/ws/**").permitAll()
                 // 放行上传文件的静态资源访问
                 .antMatchers("/uploads/**").permitAll()
-                // 放行评论列表公开查看
-                .antMatchers("/api/comment/list/**").permitAll()
+                // 放行评论列表公开查看（列表/全部/树形）
+                .antMatchers("/api/comment/list/**", "/api/comment/all/**", "/api/comment/tree/**").permitAll()
                 // 放行前端静态资源和Swagger文档(视情况拓展)
                 .antMatchers(
                         "/v2/api-docs",
