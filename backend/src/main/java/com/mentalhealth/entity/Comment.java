@@ -31,4 +31,12 @@ public class Comment {
 
     @TableField(exist = false)
     private String authorAvatar;
+
+    // 子评论（树形展示时使用，非数据库字段）
+    @TableField(exist = false)
+    private java.util.List<Comment> children;
+
+    // 回复目标的用户名（"@xxx" 效果）
+    @TableField(exist = false)
+    private String replyToName;
 }

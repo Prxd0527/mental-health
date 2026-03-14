@@ -33,4 +33,9 @@ public interface CommentService extends IService<Comment> {
      * @param commentId 评论ID
      */
     boolean likeComment(Long commentId);
+
+    /**
+     * 获取指定树洞的评论树形结构（支持嵌套回复）
+     */
+    java.util.List<Comment> getCommentsTree(Long postId);
 }

@@ -102,4 +102,53 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             }
         }
     }
+
+    @Override
+    public java.util.List<Comment> getCommentsTree(Long postId) {
+        // 1. 查询该树洞下所有有效评论
+        LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Comment::getPostId, postId)
+                .eq(Comment::getStatus, 1)
+                .orderByAsc(Comment::getCreateTime);
+        java.util.List<Comment> allComments = baseMapper.selectList(wrapper);
+
+        // 2. 填充作者信息和回复目标
+        for (Comment comment : allComments) {
+            fillAuthorInfo(comment);
+            comment.setChildren(new java.util.ArrayList<>());
+
+            // 如果是回复别人的评论，填充被回复者的名称
+            if (comment.getParentId() != null && comment.getParentId() > 0) {
+                Comment parentComment = allComments.stream()
+                        .filter(c -> c.getId().equals(comment.getParentId()))
+                        .findFirst().orElse(null);
+                if (parentComment != null) {
+                    comment.setReplyToName(parentComment.getAuthorName());
+                }
+            }
+        }
+
+        // 3. 构建树形：将子评论挂到父评论的 children 下
+        java.util.Map<Long, Comment> map = new java.util.LinkedHashMap<>();
+        for (Comment c : allComments) {
+            map.put(c.getId(), c);
+        }
+
+        java.util.List<Comment> rootComments = new java.util.ArrayList<>();
+        for (Comment c : allComments) {
+            if (c.getParentId() == null || c.getParentId() == 0) {
+                rootComments.add(c);
+            } else {
+                Comment parent = map.get(c.getParentId());
+                if (parent != null) {
+                    parent.getChildren().add(c);
+                } else {
+                    // 父评论不存在（已被删除），提升为顶级
+                    rootComments.add(c);
+                }
+            }
+        }
+
+        return rootComments;
+    }
 }

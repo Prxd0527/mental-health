@@ -57,6 +57,15 @@ public class CommentController {
     }
 
     /**
+     * 获取指定树洞的评论（树形嵌套结构，支持楼中楼展示）
+     */
+    @GetMapping("/tree/{postId}")
+    public Result<List<Comment>> getCommentsTree(@PathVariable Long postId) {
+        List<Comment> tree = commentService.getCommentsTree(postId);
+        return Result.success(tree);
+    }
+
+    /**
      * 评论点赞
      */
     @PostMapping("/{id}/like")

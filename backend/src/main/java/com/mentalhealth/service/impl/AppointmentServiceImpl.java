@@ -89,4 +89,20 @@ public class AppointmentServiceImpl extends ServiceImpl<AppointmentMapper, Appoi
         appointment.setFeedback(feedback);
         return this.updateById(appointment);
     }
+
+    @Override
+    public void cancelAppointment(Long appointmentId, Long studentId) {
+        Appointment appointment = this.getById(appointmentId);
+        if (appointment == null) {
+            throw new RuntimeException("预约记录不存在");
+        }
+        if (!appointment.getStudentId().equals(studentId)) {
+            throw new RuntimeException("无权取消他人的预约");
+        }
+        if (!"PENDING".equals(appointment.getStatus())) {
+            throw new RuntimeException("仅待审核的预约可以取消，当前状态: " + appointment.getStatus());
+        }
+        appointment.setStatus("CANCELLED");
+        this.updateById(appointment);
+    }
 }

@@ -30,4 +30,12 @@ public interface AppointmentService extends IService<Appointment> {
      * @param feedback      反馈意见
      */
     boolean processAppointment(Long appointmentId, String status, String feedback);
+
+    /**
+     * 学生取消预约（仅 PENDING 状态可取消）
+     *
+     * @param appointmentId 预约单ID
+     * @param studentId     操作者学生ID（用于校验本人操作）
+     */
+    void cancelAppointment(Long appointmentId, Long studentId);
 }
