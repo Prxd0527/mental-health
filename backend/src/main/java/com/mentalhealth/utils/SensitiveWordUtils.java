@@ -64,6 +64,9 @@ public class SensitiveWordUtils {
      */
     public void resetWords(Iterable<String> words) {
         wordTree.clear();
-        wordTree.addWords(words);
+        // Hutool WordTree.addWords() 需要 Collection, 此处做转换
+        java.util.List<String> list = new java.util.ArrayList<>();
+        words.forEach(list::add);
+        wordTree.addWords(list);
     }
 }

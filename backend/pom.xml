@@ -14,7 +14,7 @@
     <name>mental-health</name>
     <description>大学生心理健康咨询与“树洞”倾诉系统</description>
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>17</java.version>
     </properties>
     <dependencies>
         <!-- Spring Boot Web -->
@@ -72,11 +72,19 @@
             <version>5.8.21</version>
         </dependency>
 
-        <!-- Lombok -->
+        <!-- Lombok (需要1.18.30+以兼容JDK21) -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>1.18.30</version>
             <optional>true</optional>
+        </dependency>
+
+        <!-- javax.annotation (JDK 9+ 已移除, 需要外部引入) -->
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.3.2</version>
         </dependency>
 
         <!-- Redis -->
