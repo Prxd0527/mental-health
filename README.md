@@ -4,7 +4,7 @@
 本项目旨在开发一个基于 SpringBoot 和 Vue 的前后端分离系统，为大学生提供一个安全、私密的情绪疏导平台，结合专业的心理咨询预约服务，实现危机干预与日常心理健康的双重保障。核心目标是构建“匿名倾诉（树洞） + 心理科普 + 测评 + 实时咨询预约”的一站式服务闭环。
 
 ## 技术选型
-- **主要编程语言**: Java 8/17/21 (后端), JavaScript/TypeScript (前端)
+- **主要编程语言**: Java 17 (后端), JavaScript/TypeScript (前端)
 - **关键库/框架**: SpringBoot (后端基础), Vue.js (前端视图), MyBatis-Plus (数据库持久层)
 - **核心组件**: WebSocket (即时通讯), Hutool-SensitiveUtil (DFA敏感词过滤算法), Spring Security + JWT (安全认证)
 - **数据存储**: MySQL (业务数据), Redis (建议引入，用于WebSocket会话状态、频繁访问的科普文章缓存等)
