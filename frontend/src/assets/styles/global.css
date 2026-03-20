@@ -1,0 +1,201 @@
+/* ============================================
+   心理健康系统 - 全局样式与主题变量
+   ============================================ */
+
+/* --- Google Fonts --- */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+/* --- CSS 变量 / 主题 Token --- */
+:root {
+  /* 主色调 - 薄荷绿系 */
+  --color-primary: #5CB8A5;
+  --color-primary-light: #7ECFBF;
+  --color-primary-lighter: #D3F0EA;
+  --color-primary-dark: #3D9E8B;
+
+  /* 辅助色 */
+  --color-accent-purple: #B8A9C9;
+  --color-accent-orange: #E8A87C;
+  --color-accent-pink: #E8B4C8;
+  --color-accent-blue: #7EB8D4;
+
+  /* 中性色 */
+  --color-bg: #FAF8F5;
+  --color-bg-card: #FFFFFF;
+  --color-bg-hover: #F0EDE8;
+  --color-text-primary: #2C3E50;
+  --color-text-secondary: #6B7B8D;
+  --color-text-muted: #A0AEC0;
+  --color-border: #E8E4DF;
+  --color-border-light: #F0EDE8;
+
+  /* 状态色 */
+  --color-success: #68D391;
+  --color-warning: #F6C768;
+  --color-danger: #FC8181;
+  --color-info: #63B3ED;
+
+  /* 圆角 */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.1);
+  --shadow-card: 0 2px 12px rgba(92, 184, 165, 0.08);
+
+  /* 字体 */
+  --font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* 过渡 */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+  --transition-slow: 0.4s ease;
+
+  /* Element Plus 主题覆盖 */
+  --el-color-primary: #5CB8A5;
+  --el-color-primary-light-3: #7ECFBF;
+  --el-color-primary-light-5: #A3DDD2;
+  --el-color-primary-light-7: #C8EBE4;
+  --el-color-primary-light-8: #D3F0EA;
+  --el-color-primary-light-9: #E9F7F4;
+  --el-color-primary-dark-2: #3D9E8B;
+  --el-border-radius-base: 8px;
+  --el-font-family: var(--font-family);
+}
+
+/* --- 基础重置 --- */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-primary-dark);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* --- 通用工具类 --- */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.page-wrapper {
+  min-height: calc(100vh - 64px);
+  padding: 24px 0;
+}
+
+.card {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 24px;
+  transition: box-shadow var(--transition-normal), transform var(--transition-normal);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 20px;
+  position: relative;
+  padding-left: 16px;
+}
+
+.section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 24px;
+  background: linear-gradient(180deg, var(--color-primary), var(--color-accent-purple));
+  border-radius: 2px;
+}
+
+/* --- 页面切换动画 --- */
+.fade-slide-enter-active {
+  transition: all var(--transition-normal);
+}
+
+.fade-slide-leave-active {
+  transition: all 0.2s ease;
+}
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* --- 滚动条美化 --- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* --- 响应式断点 --- */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+  }
+}
