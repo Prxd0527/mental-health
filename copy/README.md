@@ -97,16 +97,6 @@
 - **权限校验**：手动检查 `ROLE_ADMIN` 权限（待优化为 `@PreAuthorize` 注解）。
 - **操作范围**：用户状态切换（封禁/解禁）、文章 CRUD + 上下架、问卷 CRUD + 上下线。
 
-### 前端架构（F0-F9）
-- **技术栈**：Vue 3 (Composition API + `<script setup>`) + Vite 5 + Element Plus + Pinia + Axios + Vue Router 4。
-- **项目结构**：单前端项目同时服务学生/教师/管理员三种角色，通过路由守卫 + 菜单权限区分。
-- **路由体系**：Hash 模式；学生端使用 `StudentLayout`（顶栏+内容+页脚），教师/管理端使用 `AdminLayout`（可折叠侧栏+顶栏+内容区）。
-- **认证机制**：登录后 JWT 存 `localStorage`，Axios 请求拦截器自动注入 `Authorization: Bearer`，401 自动清 Token 跳登录页。
-- **Pinia Store**：`auth.js` 管理 Token 持久化 + JWT payload 解析 + 角色计算属性（`isStudent/isTeacher/isAdmin`）。
-- **Vite 代理**：`/api` → `localhost:8080`（REST）, `/ws` → `ws://localhost:8080`（WebSocket）, `/uploads` → `localhost:8080`（文件资源）。
-- **设计风格**：薄荷绿治愈主题 `#5CB8A5`，辅以淡紫 `#B8A9C9`、暖橙 `#E8A87C`；全局 CSS 变量覆盖 Element Plus 主题色。
-- **文件总量**：API 层 10 个（auth/article/post/comment/quiz/appointment/schedule/chat/admin/common），视图 17 个，布局 2 个，通用组件 2 个。
-
 ## 开发状态跟踪
 | 模块/功能 | 状态 | 负责人 | 计划完成日期 | 实际完成日期 | 备注 |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -123,41 +113,11 @@
 | **P0. 阻断性功能补全** | 已完成 | sylvia | 待定 | 2026-03-15 | CORS/资源映射/个人中心/初始数据 |
 | **P1. 功能增强** | 已完成 | sylvia | 待定 | 2026-03-15 | 管理端18接口/题目CRUD/评论分页/仪表盘 |
 | **P2. 增值功能** | 已完成 | sylvia | 待定 | 2026-03-15 | 消息已读/评论嵌套/预约取消 |
-| **10. 后端集成测试与环境配置优化** | 已完成 | AI | 2026-03-19 | 2026-03-19 | 完成 9 大核心 Controller 类 42 个用例的 MockMvc 自动化测试，测试全通过 |
-| **F0. 前端工程初始化与基础设施** | 已完成 | sylvia | 2026-03-19 | 2026-03-19 | Vite+Vue3+ElementPlus+Pinia+Axios, 全局样式/拦截器/路由守卫/布局组件 |
-| **F1. 前端认证模块与首页** | 已完成 | sylvia | 2026-03-19 | 2026-03-19 | LoginView/RegisterView/HomeView, JWT 持久化登录 |
-| **F2. 前端科普文章模块** | 已完成 | sylvia | 2026-03-19 | 2026-03-19 | 文章列表（分页搜索）+ 文章详情（富文本渲染） |
-| **F3. 前端树洞系统模块** | 已完成 | sylvia | 2026-03-19 | 2026-03-19 | 树洞广场（排序/标签/分页）+ 详情评论区 + 匿名发布 |
-| **F4. 前端心理测评模块** | 已完成 | sylvia | 2026-03-19 | 2026-03-19 | 量表列表 + 答题页（步进式）+ 结果展示 |
-| **F5. 前端预约咨询模块** | 已完成 | sylvia | 2026-03-19 | 2026-03-19 | 咨询师名片 + 排班联动预约 + 我的预约记录 |
-| **F6. 前端即时聊天模块** | 已完成 | sylvia | 2026-03-19 | 2026-03-19 | WebSocket 实时通信 + 会话列表 + 消息气泡 |
-| **F7. 前端个人中心** | 已完成 | sylvia | 2026-03-19 | 2026-03-19 | 用户信息 + 测评历史 + 修改密码 |
-| **F8. 前端教师端** | 已完成 | sylvia | 2026-03-19 | 2026-03-19 | 排班管理 + 预约审批 + 侧栏布局 |
-| **F9. 前端管理端** | 已完成 | sylvia | 2026-03-19 | 2026-03-19 | 仪表盘 + 用户管理 + 文章管理 + 题库管理 |
 
 ## 代码检查与问题记录
 
-### 后端审查记录 (2026-03-15)
-【已修复】共发现 8 个潜在问题，涉及 UserService、SecurityConfig、GlobalExceptionHandler、SensitiveWordUtils 等核心模块，并已全部修复。详情可参见 Git 提交历史。
+> 检查日期：2026-03-15 | 共发现 **8 项** 问题/改进点，均已修复。
 
-### 前端代码自检记录 (2026-03-19)
-在完成 F0-F9 阶段前端开发后执行全面的代码审查，发现以下 5 个潜在问题：
-
-1. **[高优先] WebSocket 重连死循环溢出缺陷（ChatView）**
-   - **问题说明**：在 `ChatView.vue` 的 `onUnmounted` 生命周期中调用了 `ws.close()`，但同时触发了 `ws.onclose` 事件，此时 `onclose` 内硬编码了 `setTimeout` 以实现断线重连。这会导致即使用户离开聊天页面并销毁了组件，WebSocket 也会在后台无限死循环尝试重连，消耗系统资源与网络带宽。
-   - **改进建议**：引入 `isUnmounted` 标志位。在组件卸载时设置为 `true`，`onclose` 回调中需判断 `!isUnmounted` 时才执行重新连接尝试。
-2. **[中优先] 全局异常捕获机制与无限 Loading 状态（多页面组件）**
-   - **问题说明**：为了代码精简，项目中大量 `try/catch` 的 `catch` 块被写成了 `{ /* ignore */ }`，虽然前端全局 Axios 拦截器会统一拦截并 `ElMessage` 弹出错误，但前端如果在 `try` 块内发生了其他不可预知的非请求型 JavaScript 报错（如拼写错误等），异常将被默默吞没，极为不利于排查问题。此外，部分表格和列表页的 `loading.value = false` 写在 `try` 内部的末尾，一旦中途报错将导致无限 Loading（例如 `UserManage.vue` 中已正确放置在外部或 `finally`，但部分旧代码如业务页中仍需要复核）。
-   - **改进建议**：将 `catch` 块中的 `/* ignore */` 替换为 `console.warn(e)` 输出调试信息，并且严格将 `loading.value = false` 放置在 `finally` 块中。
-3. **[低优先] XSS 跨站脚本安全隐患（ArticleDetailView）**
-   - **问题说明**：文章详情目前使用 `v-html="article.content"` 直接渲染富文本内容。如果后台超管系统允许录入不安全的 HTML 内容，可能导致 XSS 攻击。
-   - **改进建议**：虽然管理员上传可暂时认为可信，但长期维护应引入 `DOMPurify` 库对 HTML 字符串进行安全净化处理，再通过 `v-html` 渲染。
-4. **[低优先] 空标签解析边界死机风险（TreeholeSquare/TreeholeDetail）**
-   - **问题说明**：`post.tags.split(',')` 方法直接跟在 `v-if="post.tags"` 之后执行，如果后端由于脏数据返回了 `tags: " "` 或是仅包含空字符的内容，依然能够安全拆分。不过，若后台数据传回其他未预期的数据类型而非字符串，调用 `.split()` 可能会导致 Vue 渲染失败并产生组件白屏。
-   - **改进建议**：将数据解析逻辑抽离为 `computed` 或工具函数进行安全类型检查。
-5. **[优化点] 缺乏统一部署的表单验证封装**
-   - **问题说明**：`LoginView` 和 `RegisterView` 中利用了完整的 `ElForm` 校验规则，这是合理的。但在“发表树洞”、“提交预约评论”时往往使用的是手动 JS 判断，不够严谨统一。
-   - **改进建议**：所有涉及重要信息输入的框口都应当统一引入 `el-form` 和统一的校验 rules 以加强用户体验一致性。
 ### 🔴 编译级缺陷（已修复）
 
 | # | 文件 | 问题描述 | 修复方案 |
@@ -215,18 +175,6 @@
 | E | `ChatMessageServiceImpl.getConversationList()` 全量查询所有相关消息后内存分组，数据量大时性能不佳 | 低（初期数据量小） | 后期可改为 SQL GROUP BY 子查询，直接在数据库层取每组最新一条 |
 | F | `CommentServiceImpl.getCommentsTree()` 中查找 replyToName 用 `stream().filter()` 遍历列表，O(n²) 复杂度 | 低（单帖评论量有限） | 可改为使用 map.get(parentId) 直接查找 |
 | G | `application.yml` 中 `mybatis-plus.configuration.log-impl` 使用 StdOutImpl 输出全部 SQL 日志 | 无（开发阶段有用） | 生产部署时应移除或改为 SLF4J |
-
----
-
-> 第三次检查日期：2026-03-19 | 后端集成单元测试全面覆盖 | 共编写并执行 42 个用例
-
-### 🔴 测试环境级缺陷与阻断（已修复 ✅）
-
-| # | 测试类/文件 | 问题描述 | 修复方案 |
-|---|-------------|---------|---------| 
-| 13 | `WebSocketConfig.java` | `@SpringBootTest` 默认缺乏 Servlet 容器环境引起 `javax.websocket.server.ServerContainer not available` 初始化报错，导致整个上下文启动失败。 | 追加 `@ConditionalOnProperty(name="websocket.enabled", matchIfMissing=true)` 注解，并在 `src/test/resources/application.properties` 中强制置为 `false`，从而在测试时跳过 WebSocket 的装配。 |
-| 14 | `init-data.sql` | 数据库预置账户密码的密文 `$` 哈希均不是正确的 `admin123` 对应的 BCrypt 值，导致测试期间大量针对 `/api/auth/login` 的请求报出 500 NPE 密码错误。 | 生成并更新底层测试用户的所有密码加密为真实的 `admin123` 密文，保持数据同步。 |
-| 15 | `*ControllerTest.java` | （数据超长报错截断/上下文缺少帖子数据）树洞和评论接口强关联依赖数据库初始中不存在的 ID 取数据，造成 NPE 问题。 | 通过原生的 `INSERT INTO ...` SQL 指令显式向数据库埋入 id 为 1 的测试树洞及评论基准数据。 |
 
 ## 相关文档索引
 
