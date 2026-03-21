@@ -18,9 +18,17 @@
         <div class="apt-footer" v-if="apt.status === 'APPROVED'">
           <el-button size="small" type="primary" round @click="$router.push('/chat')">去咨询</el-button>
         </div>
+        <div class="apt-footer" v-if="apt.status === 'COMPLETED'">
+          <el-button v-if="!apt.evaluated" size="small" type="warning" round @click="openFeedback(apt.id)">
+            ⭐ 评价咨询
+          </el-button>
+          <el-tag v-else type="success" size="small" round>已评价</el-tag>
+        </div>
       </div>
     </div>
     <el-empty v-else description="暂无预约记录" />
+
+    <FeedbackDialog ref="feedbackDialogRef" @submitted="fetchData" />
   </div>
 </template>
 
@@ -28,8 +36,11 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getMyAppointments, cancelAppointment } from '@/api/appointment'
+import { checkEvaluated } from '@/api/feedback'
+import FeedbackDialog from '@/components/FeedbackDialog.vue'
 
 const appointments = ref([])
+const feedbackDialogRef = ref(null)
 
 const statusMap = { PENDING: '待审核', APPROVED: '已同意', REJECTED: '已拒绝', COMPLETED: '已完成', CANCELLED: '已取消' }
 const statusTypeMap = { PENDING: 'warning', APPROVED: 'success', REJECTED: 'danger', COMPLETED: 'info', CANCELLED: 'info' }
@@ -42,7 +53,30 @@ async function handleCancel(id) {
 }
 
 async function fetchData() {
-  try { const res = await getMyAppointments(); appointments.value = res.data || [] } catch { /* ignore */ }
+  try {
+    const res = await getMyAppointments()
+    const list = res.data || []
+    // 为已完成的预约检查是否已评价
+    for (const apt of list) {
+      if (apt.status === 'COMPLETED') {
+        try {
+          const evalRes = await checkEvaluated(apt.id)
+          apt.evaluated = evalRes.data === true
+        } catch {
+          apt.evaluated = false
+        }
+      } else {
+        apt.evaluated = false
+      }
+    }
+    appointments.value = list
+  } catch { /* ignore */ }
+}
+
+function openFeedback(appointmentId) {
+  if (feedbackDialogRef.value) {
+    feedbackDialogRef.value.open(appointmentId)
+  }
 }
 
 onMounted(fetchData)

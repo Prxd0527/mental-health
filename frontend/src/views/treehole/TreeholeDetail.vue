@@ -25,6 +25,7 @@
       <div class="post-stats">
         <span class="stat-item" @click="handleLike">❤️ {{ post.likes || 0 }}</span>
         <span class="stat-item">👁️ {{ post.views || 0 }}</span>
+        <span class="stat-item" @click="openReport('POST', post.id)">🚩 举报</span>
       </div>
     </div>
     <el-skeleton v-else :rows="4" animated />
@@ -69,11 +70,16 @@
             <span class="action-item" @click="handleCommentLike(comment)">
               ❤️ {{ comment.likes || 0 }}
             </span>
+            <span class="action-item" style="margin-left: 16px;" @click="openReport('COMMENT', comment.id)">
+              🚩 举报
+            </span>
           </div>
         </div>
       </div>
       <el-empty v-else description="暂无评论，来说说你的想法吧~" :image-size="80" />
     </div>
+
+    <ReportDialog ref="reportDialogRef" />
   </div>
 </template>
 
@@ -84,8 +90,10 @@ import { useAuthStore } from '@/stores/auth'
 import { ElMessage } from 'element-plus'
 import { getPostDetail, likePost } from '@/api/post'
 import { getComments, publishComment, likeComment } from '@/api/comment'
+import ReportDialog from '@/components/ReportDialog.vue'
 
 const route = useRoute()
+const reportDialogRef = ref(null)
 const authStore = useAuthStore()
 
 const post = ref(null)
@@ -120,6 +128,16 @@ async function handleCommentLike(comment) {
     await likeComment(comment.id)
     comment.likes = (comment.likes || 0) + 1
   } catch (e) { /* ignore */ }
+}
+
+function openReport(type, id) {
+  if (!authStore.isLoggedIn) {
+    ElMessage.warning('请先登录后再举报')
+    return
+  }
+  if (reportDialogRef.value) {
+    reportDialogRef.value.open(type, id)
+  }
 }
 
 async function submitComment() {

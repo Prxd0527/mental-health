@@ -67,6 +67,7 @@
           </span>
           <span class="action-item">💬 {{ post.commentCount || 0 }}</span>
           <span class="action-item">👁️ {{ post.views || 0 }}</span>
+          <span class="action-item" @click.stop="openReport(post.id)">🚩 举报</span>
         </div>
       </div>
     </div>
@@ -109,6 +110,8 @@
         <el-button type="primary" :loading="publishing" @click="handlePublish">发布</el-button>
       </template>
     </el-dialog>
+
+    <ReportDialog ref="reportDialogRef" />
   </div>
 </template>
 
@@ -117,8 +120,10 @@ import { ref, reactive, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { ElMessage } from 'element-plus'
 import { getPostSquare, publishPost, likePost } from '@/api/post'
+import ReportDialog from '@/components/ReportDialog.vue'
 
 const authStore = useAuthStore()
+const reportDialogRef = ref(null)
 const posts = ref([])
 const sortBy = ref('latest')
 const selectedTag = ref('')
@@ -176,6 +181,16 @@ async function handleLike(post) {
     await likePost(post.id)
     post.likes = (post.likes || 0) + 1
   } catch (e) { /* ignore */ }
+}
+
+function openReport(postId) {
+  if (!authStore.isLoggedIn) {
+    ElMessage.warning('请先登录后再举报')
+    return
+  }
+  if (reportDialogRef.value) {
+    reportDialogRef.value.open('POST', postId)
+  }
 }
 
 async function handlePublish() {

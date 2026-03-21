@@ -1,69 +1,73 @@
 /* ============================================
-   心理健康系统 - 全局样式与主题变量
+   心理健康系统 - 全局样式与主题变量 (Modernized)
    ============================================ */
 
-/* --- Google Fonts --- */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
 
-/* --- CSS 变量 / 主题 Token --- */
 :root {
-  /* 主色调 - 薄荷绿系 */
-  --color-primary: #5CB8A5;
-  --color-primary-light: #7ECFBF;
-  --color-primary-lighter: #D3F0EA;
-  --color-primary-dark: #3D9E8B;
+  /* 主色调 - 深邃苍翠绿 */
+  --color-primary: #2A9D8F;
+  --color-primary-light: #52B5A8;
+  --color-primary-lighter: #DFF1EE;
+  --color-primary-dark: #218376;
 
   /* 辅助色 */
-  --color-accent-purple: #B8A9C9;
-  --color-accent-orange: #E8A87C;
-  --color-accent-pink: #E8B4C8;
-  --color-accent-blue: #7EB8D4;
+  --color-accent-purple: #B1A8D9;
+  --color-accent-orange: #F4A261;
+  --color-accent-red: #E76F51;
+  --color-accent-yellow: #E9C46A;
 
-  /* 中性色 */
-  --color-bg: #FAF8F5;
-  --color-bg-card: #FFFFFF;
-  --color-bg-hover: #F0EDE8;
-  --color-text-primary: #2C3E50;
-  --color-text-secondary: #6B7B8D;
+  /* 中性色 & 背景 */
+  --color-bg: #F8F9FA;
+  --color-bg-card: rgba(255, 255, 255, 0.85);
+  --color-bg-hover: rgba(0, 0, 0, 0.04);
+  --color-text-primary: #1A202C;
+  --color-text-secondary: #4A5568;
   --color-text-muted: #A0AEC0;
-  --color-border: #E8E4DF;
-  --color-border-light: #F0EDE8;
+  --color-border: #E2E8F0;
+  --color-border-light: #F7FAFC;
 
   /* 状态色 */
-  --color-success: #68D391;
-  --color-warning: #F6C768;
-  --color-danger: #FC8181;
-  --color-info: #63B3ED;
+  --color-success: #2A9D8F;
+  --color-warning: #E9C46A;
+  --color-danger: #E76F51;
+  --color-info: #4299E1;
 
   /* 圆角 */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 32px;
 
   /* 阴影 */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.1);
-  --shadow-card: 0 2px 12px rgba(92, 184, 165, 0.08);
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 20px 40px -5px rgba(42, 157, 143, 0.12); /* 带有主色倾向的弥散阴影 */
+  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.04);
+
+  /* 玻璃拟物特效变量 */
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.6);
+  --glass-blur: blur(24px);
 
   /* 字体 */
-  --font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 
-  /* 过渡 */
-  --transition-fast: 0.15s ease;
-  --transition-normal: 0.25s ease;
-  --transition-slow: 0.4s ease;
+  /* 过渡曲线 (Smoother) */
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-spring: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   /* Element Plus 主题覆盖 */
-  --el-color-primary: #5CB8A5;
-  --el-color-primary-light-3: #7ECFBF;
-  --el-color-primary-light-5: #A3DDD2;
-  --el-color-primary-light-7: #C8EBE4;
-  --el-color-primary-light-8: #D3F0EA;
-  --el-color-primary-light-9: #E9F7F4;
-  --el-color-primary-dark-2: #3D9E8B;
-  --el-border-radius-base: 8px;
+  --el-color-primary: #2A9D8F;
+  --el-color-primary-light-3: #52B5A8;
+  --el-color-primary-light-5: #7BCAC1;
+  --el-color-primary-light-7: #A6DFD9;
+  --el-color-primary-light-8: #BCEAE5;
+  --el-color-primary-light-9: #DFF1EE;
+  --el-color-primary-dark-2: #218376;
+  --el-border-radius-base: 10px;
   --el-font-family: var(--font-family);
 }
 
@@ -88,6 +92,16 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glassmorphism 核心类 */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-xl);
 }
 
 a {
@@ -122,21 +136,24 @@ img {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
   padding: 24px;
-  transition: box-shadow var(--transition-normal), transform var(--transition-normal);
+  transition: box-shadow var(--transition-normal), transform var(--transition-spring);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .card:hover {
   box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  transform: translateY(-4px);
 }
 
 .section-title {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--color-text-primary);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   position: relative;
   padding-left: 16px;
+  letter-spacing: -0.01em;
 }
 
 .section-title::before {
@@ -148,10 +165,10 @@ img {
   width: 4px;
   height: 24px;
   background: linear-gradient(180deg, var(--color-primary), var(--color-accent-purple));
-  border-radius: 2px;
+  border-radius: 4px;
 }
 
-/* --- 页面切换动画 --- */
+/* --- 页面切换动画 (优化缩放) --- */
 .fade-slide-enter-active {
   transition: all var(--transition-normal);
 }
@@ -162,12 +179,12 @@ img {
 
 .fade-slide-enter-from {
   opacity: 0;
-  transform: translateY(12px);
+  transform: translateY(12px) scale(0.98);
 }
 
 .fade-slide-leave-to {
   opacity: 0;
-  transform: translateY(-8px);
+  transform: translateY(-8px) scale(0.98);
 }
 
 /* --- 滚动条美化 --- */
@@ -181,12 +198,12 @@ img {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
+  background: rgba(0, 0, 0, 0.15);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-muted);
+  background: rgba(0, 0, 0, 0.25);
 }
 
 /* --- 响应式断点 --- */

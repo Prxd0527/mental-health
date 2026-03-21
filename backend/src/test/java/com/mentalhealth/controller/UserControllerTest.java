@@ -113,7 +113,7 @@ public class UserControllerTest {
         pwdRequest.put("oldPassword", "admin123");
         pwdRequest.put("newPassword", "654321");
 
-        mockMvc.perform(post("/api/user/password")
+        mockMvc.perform(put("/api/user/password")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(pwdRequest)))

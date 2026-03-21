@@ -52,6 +52,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/uploads/**").permitAll()
                 // 放行评论列表公开查看（列表/全部/树形）
                 .antMatchers("/api/comment/list/**", "/api/comment/all/**", "/api/comment/tree/**").permitAll()
+                // 放行咨询师评价公开查看
+                .antMatchers("/api/feedback/teacher/**").permitAll()
                 // 放行前端静态资源和Swagger文档(视情况拓展)
                 .antMatchers(
                         "/v2/api-docs",

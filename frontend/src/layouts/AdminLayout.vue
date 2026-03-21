@@ -50,6 +50,10 @@
               <el-icon><Notebook /></el-icon>
               <span>题库管理</span>
             </el-menu-item>
+            <el-menu-item index="/admin/reports">
+              <el-icon><Warning /></el-icon>
+              <span>举报管理</span>
+            </el-menu-item>
           </el-menu-item-group>
         </template>
       </el-menu>
@@ -100,7 +104,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import {
   Calendar, Tickets, ChatDotRound, DataAnalysis,
-  User, Document, Notebook, ArrowDown, Expand, Fold
+  User, Document, Notebook, Warning, ArrowDown, Expand, Fold
 } from '@element-plus/icons-vue'
 
 const route = useRoute()

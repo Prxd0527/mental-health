@@ -53,8 +53,10 @@
 | 8 | `article` | Article | 科普资讯文章表 |
 | 9 | `appointment` | Appointment | 预约记录表 |
 | 10 | `chat_message` | ChatMessage | 聊天消息记录表 |
-| 11 | `report` | - | 举报与审核表（待对接） |
+| 11 | `report` | Report | 举报与审核表 |
 | 12 | `teacher_schedule` | TeacherSchedule | 教师排班表 |
+| 13 | `feedback` | Feedback | 咨询评价表（1-5星匿名评价） |
+| 14 | `mood_log` | MoodLog | 心情打卡日记表（每日Emoji+笔记） |
 
 ## 技术实现细节
 
@@ -97,6 +99,10 @@
 - **权限校验**：手动检查 `ROLE_ADMIN` 权限（待优化为 `@PreAuthorize` 注解）。
 - **操作范围**：用户状态切换（封禁/解禁）、文章 CRUD + 上下架、问卷 CRUD + 上下线。
 
+### 二期优化核心治理模型（模块10）
+- **触发器式危机预警**：树洞与心理测评增设前置拦截处理器。检测到高危成分时，系统拒绝发布/警示，抛出 `CrisisException` 阻断，返回心理援助热线，并实时输出后台告警日志。
+- **UGC 内容举报闭环**：前端增设 `ReportDialog` 标准件接收用户投诉；后端 `ReportService` 落库审查；超管系统追加 `ReportManage` 看板展示并实施靶向“一键屏蔽/驳回”。
+
 ### 前端架构（F0-F9）
 - **技术栈**：Vue 3 (Composition API + `<script setup>`) + Vite 5 + Element Plus + Pinia + Axios + Vue Router 4。
 - **项目结构**：单前端项目同时服务学生/教师/管理员三种角色，通过路由守卫 + 菜单权限区分。
@@ -120,10 +126,18 @@
 | **7. 教师端 - 排班与工单审批系统** | 已完成 | sylvia | 待定 | 2026-03-15 | 教师自定义排期与审批集成 |
 | **8. WebSocket 在线私聊服务中心** | 已完成 | sylvia | 待定 | 2026-03-15 | 即时通讯信道及消息落库完成 |
 | **9. 管理端 - 系统账号与题库维护** | 已完成 | sylvia | 待定 | 2026-03-15 | 超管控制台 API 已接通 |
+| **10. 二期优化 - 危机预警与干预** | 已完成 | AI | 2026-03-20 | 2026-03-20 | 实现高危关键词与测评高分触发告警与熔断 |
+| **11. 二期优化 - UGC举报审核闭环** | 已完成 | AI | 2026-03-20 | 2026-03-20 | 完成双端投诉入口与总后台审查面板机制构建 |
+| **12. 二期优化 - 咨询后评价与反馈** | 已完成 | AI | 2026-03-20 | 2026-03-20 | 1-5星匿名评价、前端弹窗、“我的预约”页集成完成 |
+| **13. 二期优化 - 情绪管理与心情打卡** | 已完成 | AI | 2026-03-20 | 2026-03-20 | Emoji日记打卡+月度情绪统计+趋势图+日历网格全功能落地 |
+| **14. 二期优化 - 隐私与免责配置** | 已完成 | AI | 2026-03-20 | 2026-03-20 | 首次登录隐私协议弹窗(滚动必读+勾选确认)，localStorage持久化 |
+| **15. 工程运维完善** | 跳过 | — | — | — | 
+| **16. 用户手册与数据报表** | 跳过 | — | — | — | 
 | **P0. 阻断性功能补全** | 已完成 | sylvia | 待定 | 2026-03-15 | CORS/资源映射/个人中心/初始数据 |
 | **P1. 功能增强** | 已完成 | sylvia | 待定 | 2026-03-15 | 管理端18接口/题目CRUD/评论分页/仪表盘 |
 | **P2. 增值功能** | 已完成 | sylvia | 待定 | 2026-03-15 | 消息已读/评论嵌套/预约取消 |
 | **10. 后端集成测试与环境配置优化** | 已完成 | AI | 2026-03-19 | 2026-03-19 | 完成 9 大核心 Controller 类 42 个用例的 MockMvc 自动化测试，测试全通过 |
+| **11. 后端 API 功能实测（全量端点覆盖）** | 已完成 | AI | 2026-03-20 | 2026-03-20 | 覆盖 13 个 Controller 共 66 个端点功能实测，通过率 100% |
 | **F0. 前端工程初始化与基础设施** | 已完成 | sylvia | 2026-03-19 | 2026-03-19 | Vite+Vue3+ElementPlus+Pinia+Axios, 全局样式/拦截器/路由守卫/布局组件 |
 | **F1. 前端认证模块与首页** | 已完成 | sylvia | 2026-03-19 | 2026-03-19 | LoginView/RegisterView/HomeView, JWT 持久化登录 |
 | **F2. 前端科普文章模块** | 已完成 | sylvia | 2026-03-19 | 2026-03-19 | 文章列表（分页搜索）+ 文章详情（富文本渲染） |
@@ -218,6 +232,25 @@
 
 ---
 
+> 第四次检查日期：2026-03-21 | 用户反馈Bug修复 | 修复 3 个前后端交互缺陷
+
+### 🔴 前后端交互缺陷（已修复 ✅）
+
+| # | 文件 | 问题描述 | 修复方案 |
+|---|------|---------|---------|
+| 16 | `Result.java` | 后端 `msg` 字段名与前端 `request.js` 读取的 `message` 不匹配，导致所有错误消息在前端显示为"操作失败" | 将字段名 `msg` → `message`，统一前后端 |
+| 17 | `UserController.java` | 修改密码接口 `@PostMapping` 与前端 `request.put` 不匹配，导致 405 错误 | 改为 `@PutMapping("/user/password")` |
+| 18 | `QuizDoView.vue` | 答题页使用 `currentQuestion.title` 和 `opt.text`，但实体字段为 `content`、数据库选项用 `label`，导致题目和选项显示空白 | 修正为 `currentQuestion.content` 和 `opt.label` |
+| 19 | `ProfileView.vue` | 修改密码按钮 text 样式不美观，与个人信息卡片不协调 | 改为 `plain round` 圆角按钮 + 分隔线 + 图标前缀 |
+| 20 | `admin.js` | 用户/文章/题库管理3个查询路径与后端不匹配（`/admin/users` vs `/admin/user/list` 等），导致管理页面查不到数据 | 修正为 `/admin/user/list`、`/admin/article/list`、`/admin/quiz/list` |
+| 21 | `report.js` | 举报管理3个 API 路径全部与后端 `ReportController` 不匹配（`/reports` vs `/report/submit`等），且处理举报 HTTP 方法 PUT vs POST 不一致 | 修正路径为 `/report/submit`、`/report/admin/list`、`/report/admin/{id}/process`，方法改为 POST |
+| 22 | `DashboardView.vue` | 仪表盘字段名不匹配（前端 `userCount` vs 后端 `totalUsers` 等），且卡片标签与实际数据语义不一致 | 修正字段名并调整卡片标签与后端数据一致 |
+| 23 | `Quiz.java` + `QuizServiceImpl.java` | Quiz 列表页题目数量显示为"— 题"，因 Quiz 实体无 questionCount 字段 | 添加 `@TableField(exist=false)` 虚拟字段，Service 层动态填充 |
+| 24 | `tc60-data.sql` | TC60 量表无题目数据，答题页空白 | 创建25题×5级评分（0-4），满分100，分值越高越健康 |
+| 25 | `QuizServiceImpl.java` | 评分建议硬编码且评分方向不直觉 | 改用 `quiz_rule` 表动态匹配 + 反转评分方向（低分=不健康） |
+
+---
+
 > 第三次检查日期：2026-03-19 | 后端集成单元测试全面覆盖 | 共编写并执行 42 个用例
 
 ### 🔴 测试环境级缺陷与阻断（已修复 ✅）
@@ -227,6 +260,38 @@
 | 13 | `WebSocketConfig.java` | `@SpringBootTest` 默认缺乏 Servlet 容器环境引起 `javax.websocket.server.ServerContainer not available` 初始化报错，导致整个上下文启动失败。 | 追加 `@ConditionalOnProperty(name="websocket.enabled", matchIfMissing=true)` 注解，并在 `src/test/resources/application.properties` 中强制置为 `false`，从而在测试时跳过 WebSocket 的装配。 |
 | 14 | `init-data.sql` | 数据库预置账户密码的密文 `$` 哈希均不是正确的 `admin123` 对应的 BCrypt 值，导致测试期间大量针对 `/api/auth/login` 的请求报出 500 NPE 密码错误。 | 生成并更新底层测试用户的所有密码加密为真实的 `admin123` 密文，保持数据同步。 |
 | 15 | `*ControllerTest.java` | （数据超长报错截断/上下文缺少帖子数据）树洞和评论接口强关联依赖数据库初始中不存在的 ID 取数据，造成 NPE 问题。 | 通过原生的 `INSERT INTO ...` SQL 指令显式向数据库埋入 id 为 1 的测试树洞及评论基准数据。 |
+
+---
+
+> 第五次检查日期：2026-03-21 | 个人中心完善 + 管理后台修复
+
+### 🟢 功能完善（个人中心）
+
+| # | 文件 | 改动说明 |
+|---|------|---------|
+| 26 | `ProfileView.vue` | 完全重写：头像上传（hover 相机图标，5MB限制）、昵称/邮箱/性别/简介编辑表单、角色卡片、从 `GET /user/profile` 加载完整信息 |
+| 27 | `auth.js` (store) | `setToken` 扩展支持 extraInfo 参数保存 realName/avatar；新增 `updateUserInfo` 方法供资料修改后同步 |
+| 28 | `LoginView.vue` | 登录成功后将 realName/avatar 传递给 store |
+
+### 🔴 管理后台修复（已修复 ✅）
+
+| # | 文件 | 问题描述 | 修复方案 |
+|---|------|---------|---------|
+| 20 | `admin.js` | 用户/文章/题库管理3个查询路径与后端不匹配 | 修正为 `/admin/user/list` 等 |
+| 21 | `report.js` | 举报管理3个API路径全错 + HTTP方法不一致 | 路径修正 + 方法改为 POST |
+| 22 | `DashboardView.vue` | 仪表盘字段名不匹配 + 卡片标签语义不一致 | 字段名对齐 + 标签调整 |
+
+### 🔴 预约与在线会话修复（已修复 ✅）
+
+| # | 文件 | 问题描述 | 修复方案 |
+|---|------|---------|---------|
+| 23 | `AppointmentServiceImpl.java` | 咨询师可以给自己提交预约请求 | `submitAppointment` 中根据 `teacherId` 和 `studentId` 是否相等来拦截自预约 |
+| 24 | `AppointmentServiceImpl.java` | 预约审批通过后前端聊天侧边栏空白 | `processAppointment` 修改状态为 `APPROVED` 时，自动利用 `ChatMessageService` 保存一条初始问候消息以激活线上交流 |
+| 25 | `chat.js` / `ChatView.vue` | 侧边栏列表无法点击或刷新出历史（API 404报错 + 对象字段属性错配） | `chat.js` 的 Query 参数变更为 Path 路径传参。`ChatView.vue` 取值变量由 `targetId` 统一纠正为 `userId` 等对应字段名 |
+| 26 | `ChatView.vue` | 聊天收发信息时，左侧会话列表（例如最后一条消息内容、未读红点等）未呈现“实时的”响应式更新效果 | 在 `ws.onmessage` 回调以及 `sendMessage` 发送逻辑中，加入异步 `getConversationList()` 重新拉取以更新侧边栏，从而实现前后统一的准实时大盘 |
+
+
+| 27 | `WebSocketServer.java` | 接收方依然没能实时呈现出推送（点击后调 API 才能出来） | 后端的 `WebSocketServer` 中原先手动 `new ObjectMapper()` 没有提供 `LocalDateTime` 的反序列化支持。我给它注册了 `JavaTimeModule`，修复了这个引发推送异常中断的隐藏报错。 |
 
 ## 相关文档索引
 

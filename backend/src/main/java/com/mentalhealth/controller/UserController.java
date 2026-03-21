@@ -80,7 +80,7 @@ public class UserController {
     /**
      * 修改密码
      */
-    @PostMapping("/user/password")
+    @PutMapping("/user/password")
     public Result<String> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
         if (userId == null)

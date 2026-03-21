@@ -4,9 +4,11 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mentalhealth.entity.Appointment;
+import com.mentalhealth.entity.ChatMessage;
 import com.mentalhealth.entity.User;
 import com.mentalhealth.mapper.AppointmentMapper;
 import com.mentalhealth.service.AppointmentService;
+import com.mentalhealth.service.ChatMessageService;
 import com.mentalhealth.service.UserService;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +21,18 @@ public class AppointmentServiceImpl extends ServiceImpl<AppointmentMapper, Appoi
     @Resource
     private UserService userService;
 
+    @Resource
+    private ChatMessageService chatMessageService;
+
     @Override
     public boolean submitAppointment(Appointment appointment) {
         if (appointment.getTeacherId() == null || appointment.getAppointDate() == null
                 || StrUtil.isBlank(appointment.getTimeSlot())) {
             throw new RuntimeException("预约信息不完整");
+        }
+
+        if (appointment.getTeacherId().equals(appointment.getStudentId())) {
+            throw new RuntimeException("不能预约自己");
         }
 
         // 可选：检查该时段是否已被预约(冲突检测)
@@ -87,7 +96,20 @@ public class AppointmentServiceImpl extends ServiceImpl<AppointmentMapper, Appoi
         }
         appointment.setStatus(status);
         appointment.setFeedback(feedback);
-        return this.updateById(appointment);
+        boolean updated = this.updateById(appointment);
+
+        // 如果审核通过，自动给发起预约的学生发送一条打招呼消息，激活聊天会话
+        if (updated && "APPROVED".equals(status)) {
+            ChatMessage welcomeMessage = new ChatMessage();
+            welcomeMessage.setSenderId(appointment.getTeacherId());
+            welcomeMessage.setReceiverId(appointment.getStudentId());
+            welcomeMessage.setContent("您好，您的预约（" + appointment.getAppointDate() + " " + appointment.getTimeSlot() + "）已通过。我们可以在这里开始咨询沟通。");
+            welcomeMessage.setType("TEXT");
+            // state 会在 service 内补全
+            chatMessageService.saveMessage(welcomeMessage);
+        }
+
+        return updated;
     }
 
     @Override

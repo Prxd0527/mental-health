@@ -94,6 +94,12 @@ const routes = [
         name: 'Profile',
         component: () => import('@/views/profile/ProfileView.vue'),
         meta: { title: '个人中心', auth: true }
+      },
+      {
+        path: 'mood',
+        name: 'MoodCheckIn',
+        component: () => import('@/views/profile/MoodView.vue'),
+        meta: { title: '心情打卡', auth: true }
       }
     ]
   },
@@ -160,6 +166,12 @@ const routes = [
         name: 'QuizManage',
         component: () => import('@/views/admin/QuizManage.vue'),
         meta: { title: '题库管理' }
+      },
+      {
+        path: 'reports',
+        name: 'ReportManage',
+        component: () => import('@/views/admin/ReportManage.vue'),
+        meta: { title: '举报管理' }
       }
     ]
   },

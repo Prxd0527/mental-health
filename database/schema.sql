@@ -167,3 +167,33 @@ CREATE TABLE `teacher_schedule` (
   UNIQUE KEY `uk_teacher_date` (`teacher_id`, `work_date`),
   KEY `idx_teacher_id` (`teacher_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='教师排班表';
+
+-- 13. 咨询评价表 (Feedback) - 咨询后评价与反馈
+CREATE TABLE `feedback` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `appointment_id` BIGINT NOT NULL COMMENT '关联预约ID',
+  `student_id` BIGINT NOT NULL COMMENT '评价学生ID',
+  `teacher_id` BIGINT NOT NULL COMMENT '被评价咨询师ID',
+  `rating` TINYINT NOT NULL COMMENT '评分 1-5 星',
+  `content` VARCHAR(500) DEFAULT NULL COMMENT '评价内容（可选）',
+  `is_anonymous` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '是否匿名',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '评价时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_appointment_id` (`appointment_id`),
+  KEY `idx_teacher_id` (`teacher_id`),
+  KEY `idx_student_id` (`student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='咨询评价表';
+
+-- 14. 心情打卡表 (MoodLog) - 每日 Emoji 日记
+CREATE TABLE `mood_log` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `user_id` BIGINT NOT NULL COMMENT '用户ID',
+  `mood` VARCHAR(20) NOT NULL COMMENT '心情标识: HAPPY/GOOD/NEUTRAL/SAD/TERRIBLE',
+  `emoji` VARCHAR(10) NOT NULL COMMENT '对应 Emoji 符号',
+  `note` VARCHAR(300) DEFAULT NULL COMMENT '心情备注（可选）',
+  `log_date` DATE NOT NULL COMMENT '打卡日期',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_date` (`user_id`, `log_date`),
+  KEY `idx_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='心情打卡日记表';

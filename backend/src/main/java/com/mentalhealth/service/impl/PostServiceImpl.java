@@ -30,6 +30,20 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
             throw new RuntimeException("树洞内容不能为空");
         }
 
+        // 危机预警功能：高危词汇拦截
+        String content = post.getContent();
+        if (content.contains("想死") || content.contains("活不下去了") || content.contains("自残") || content.contains("绝望") || content.contains("自杀")) {
+            post.setStatus(0); // 隐藏此内容
+            post.setLikes(0);
+            post.setViews(0);
+            if (post.getIsAnonymous() == null) {
+                post.setIsAnonymous(1);
+            }
+            this.save(post);
+            System.err.println("!!! [系统高危告警] 用户 ID: " + post.getUserId() + " 发布了极度危险的树洞内容，已拦截并存入待复核区 !!!");
+            throw new RuntimeException("【高危预警拦截】系统检测到您的情绪可能处于极度低谷。生命只有一次，人间总有温情！若遇到紧急状况，请立刻拨打24小时免费心理危机干预热线：400-161-9995。");
+        }
+
         // 关键业务逻辑：DFA敏感词脱敏替换
         if (sensitiveWordUtils.containsSensitiveWord(post.getContent())) {
             String safeContent = sensitiveWordUtils.replaceSensitiveWord(post.getContent());

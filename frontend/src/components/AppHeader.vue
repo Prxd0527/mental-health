@@ -18,10 +18,10 @@
         <template v-if="authStore.isLoggedIn">
           <el-dropdown trigger="click" @command="handleCommand">
             <div class="user-trigger">
-              <el-avatar :size="34" class="user-avatar">
-                {{ authStore.username?.charAt(0)?.toUpperCase() }}
+              <el-avatar :size="34" :src="headerAvatarUrl" class="user-avatar">
+                {{ displayName?.charAt(0)?.toUpperCase() }}
               </el-avatar>
-              <span class="user-name hide-mobile">{{ authStore.username }}</span>
+              <span class="user-name hide-mobile">{{ displayName }}</span>
               <el-icon><ArrowDown /></el-icon>
             </div>
             <template #dropdown>
@@ -34,6 +34,9 @@
                 </el-dropdown-item>
                 <el-dropdown-item command="chat">
                   <el-icon><ChatDotRound /></el-icon>在线咨询
+                </el-dropdown-item>
+                <el-dropdown-item command="mood">
+                  <el-icon><Sunrise /></el-icon>心情打卡
                 </el-dropdown-item>
                 <el-dropdown-item v-if="authStore.isTeacher || authStore.isAdmin" command="teacher" divided>
                   <el-icon><Setting /></el-icon>工作台
@@ -67,11 +70,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import {
-  ArrowDown, User, Calendar, ChatDotRound,
+  ArrowDown, User, Calendar, ChatDotRound, Sunrise,
   Setting, Monitor, SwitchButton, Close, Menu
 } from '@element-plus/icons-vue'
 
@@ -79,11 +82,23 @@ const authStore = useAuthStore()
 const router = useRouter()
 const mobileMenuOpen = ref(false)
 
+// 显示名称：优先昵称，fallback 到用户名
+const displayName = computed(() => authStore.userInfo?.realName || authStore.username)
+
+// 头像 URL：兼容完整路径和纯文件名
+const headerAvatarUrl = computed(() => {
+  const av = authStore.userInfo?.avatar
+  if (!av) return ''
+  if (av.startsWith('/uploads/') || av.startsWith('http')) return av
+  return `/uploads/${av}`
+})
+
 function handleCommand(cmd) {
   switch (cmd) {
     case 'profile': router.push('/profile'); break
     case 'appointments': router.push('/appointments'); break
     case 'chat': router.push('/chat'); break
+    case 'mood': router.push('/mood'); break
     case 'teacher': router.push('/teacher'); break
     case 'admin': router.push('/admin'); break
     case 'logout':

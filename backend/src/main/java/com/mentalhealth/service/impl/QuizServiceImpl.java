@@ -6,9 +6,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mentalhealth.entity.Question;
 import com.mentalhealth.entity.Quiz;
 import com.mentalhealth.entity.QuizResult;
+import com.mentalhealth.entity.QuizRule;
 import com.mentalhealth.mapper.QuestionMapper;
 import com.mentalhealth.mapper.QuizMapper;
 import com.mentalhealth.mapper.QuizResultMapper;
+import com.mentalhealth.mapper.QuizRuleMapper;
 import com.mentalhealth.service.QuizService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,9 @@ public class QuizServiceImpl extends ServiceImpl<QuizMapper, Quiz> implements Qu
     @Resource
     private QuizResultMapper quizResultMapper;
 
+    @Resource
+    private QuizRuleMapper quizRuleMapper;
+
     @Override
     public Page<Quiz> getOnlineQuizPage(int pageNum, int pageSize) {
         Page<Quiz> page = new Page<>(pageNum, pageSize);
@@ -33,7 +38,16 @@ public class QuizServiceImpl extends ServiceImpl<QuizMapper, Quiz> implements Qu
         LambdaQueryWrapper<Quiz> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Quiz::getStatus, 1)
                 .orderByDesc(Quiz::getCreateTime);
-        return baseMapper.selectPage(page, wrapper);
+        Page<Quiz> result = baseMapper.selectPage(page, wrapper);
+
+        // 填充每个量表的题目数量
+        for (Quiz quiz : result.getRecords()) {
+            Long count = questionMapper.selectCount(new LambdaQueryWrapper<Question>()
+                    .eq(Question::getQuizId, quiz.getId()));
+            quiz.setQuestionCount(count.intValue());
+        }
+
+        return result;
     }
 
     @Override
@@ -55,7 +69,7 @@ public class QuizServiceImpl extends ServiceImpl<QuizMapper, Quiz> implements Qu
             throw new RuntimeException("问卷不存在或已下架");
         }
 
-        // 目前粗分配只计算累加总分
+        // 累加总分
         int totalScore = 0;
         for (Integer score : answers.values()) {
             totalScore += score != null ? score : 0;
@@ -66,13 +80,26 @@ public class QuizServiceImpl extends ServiceImpl<QuizMapper, Quiz> implements Qu
         result.setUserId(userId);
         result.setTotalScore(totalScore);
 
-        // 简述测试建议算法（后续可扩展配置化）
-        if (totalScore < 30) {
-            result.setSuggestion("您的心理状态非常棒，依然保持乐观开朗的心态！");
-        } else if (totalScore < 60) {
-            result.setSuggestion("您可能近期有些压力，建议劳逸结合，多参加放松活动。");
+        // 从 quiz_rule 表动态匹配评分区间，生成建议
+        List<QuizRule> rules = quizRuleMapper.selectList(new LambdaQueryWrapper<QuizRule>()
+                .eq(QuizRule::getQuizId, quizId)
+                .le(QuizRule::getMinScore, totalScore)
+                .ge(QuizRule::getMaxScore, totalScore));
+
+        if (rules != null && !rules.isEmpty()) {
+            result.setSuggestion(rules.get(0).getConclusion());
         } else {
-            result.setSuggestion("您的心理压力得分较高，建议预约专业咨询师进行心理疏导。");
+            // 兜底：无匹配规则时使用通用建议
+            result.setSuggestion("测评已完成，总分：" + totalScore + " 分。建议咨询专业人士获取更详细的解读。");
+        }
+
+        // 低分预警日志（分值越低=心理困扰越严重）
+        // 根据量表满分动态计算阈值（题目数 × 最高选项分 × 40%）
+        Long qCount = questionMapper.selectCount(new LambdaQueryWrapper<Question>().eq(Question::getQuizId, quizId));
+        int maxPossible = (int) (qCount * 4); // 每题最高4分
+        int warningThreshold = (int) (maxPossible * 0.4); // 低于满分 40% 触发告警
+        if (totalScore <= warningThreshold) {
+            System.err.println("!!! [系统高危告警] 用户 ID: " + userId + " 在问卷 ID: " + quizId + " 中得分: " + totalScore + "/" + maxPossible + "（低分预警），触发高危预警阈值 !!!");
         }
 
         quizResultMapper.insert(result);

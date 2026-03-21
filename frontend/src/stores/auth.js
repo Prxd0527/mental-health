@@ -20,13 +20,17 @@ export const useAuthStore = defineStore('auth', () => {
   const isStudent = computed(() => role.value === 'STUDENT')
   const isTeacher = computed(() => role.value === 'TEACHER')
   const isAdmin = computed(() => role.value === 'ADMIN')
+  const hasAgreedPrivacy = computed(() => {
+    const key = `privacy_agreed_${userId.value}`
+    return localStorage.getItem(key) === 'true'
+  })
 
   // --- Actions ---
 
   /**
    * 登录成功后设置 Token 并解析用户信息
    */
-  function setToken(newToken) {
+  function setToken(newToken, extraInfo = {}) {
     token.value = newToken
     localStorage.setItem('token', newToken)
 
@@ -36,13 +40,23 @@ export const useAuthStore = defineStore('auth', () => {
       const info = {
         userId: payload.userId,
         username: payload.sub,
-        role: payload.role
+        role: payload.role,
+        realName: extraInfo.realName || '',
+        avatar: extraInfo.avatar || ''
       }
       userInfo.value = info
       localStorage.setItem('userInfo', JSON.stringify(info))
     } catch (e) {
       console.error('JWT 解析失败:', e)
     }
+  }
+
+  /**
+   * 更新用户信息（修改资料后同步 store）
+   */
+  function updateUserInfo(partial) {
+    userInfo.value = { ...userInfo.value, ...partial }
+    localStorage.setItem('userInfo', JSON.stringify(userInfo.value))
   }
 
   /**
@@ -55,10 +69,15 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('userInfo')
   }
 
+  function agreePrivacy() {
+    const key = `privacy_agreed_${userId.value}`
+    localStorage.setItem(key, 'true')
+  }
+
   return {
     token, userInfo,
     isLoggedIn, userId, username, role,
-    isStudent, isTeacher, isAdmin,
-    setToken, logout
+    isStudent, isTeacher, isAdmin, hasAgreedPrivacy,
+    setToken, updateUserInfo, logout, agreePrivacy
   }
 })

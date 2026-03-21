@@ -21,7 +21,7 @@ export function toggleQuizStatus(id, status) {
 }
 
 export function getUserList(params) {
-  return request.get('/admin/users', { params })
+  return request.get('/admin/user/list', { params })
 }
 
 export function resetPassword(userId) {
@@ -33,9 +33,9 @@ export function getDashboardStats() {
 }
 
 export function getArticleManageList(params) {
-  return request.get('/admin/articles', { params })
+  return request.get('/admin/article/list', { params })
 }
 
 export function getQuizManageList(params) {
-  return request.get('/admin/quizzes', { params })
+  return request.get('/admin/quiz/list', { params })
 }

@@ -1,6 +1,8 @@
 package com.mentalhealth.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.mentalhealth.entity.ChatMessage;
 import com.mentalhealth.service.ChatMessageService;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,10 @@ public class WebSocketServer {
     // Spring Bean 注入在 WebSocket 中比较特殊，必须通过静态或者 Setter 方式
     private static ChatMessageService chatMessageService;
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    static {
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
 
     @Autowired
     public void setChatMessageService(ChatMessageService chatMessageService) {

@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 
 export function getChatHistory(targetId) {
-  return request.get('/chat/history', { params: { targetId } })
+  return request.get(`/chat/history/${targetId}`)
 }
 
 export function getConversationList() {

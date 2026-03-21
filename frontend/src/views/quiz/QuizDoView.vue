@@ -9,7 +9,7 @@
 
       <!-- 当前题目 -->
       <div class="question-card card">
-        <h3 class="question-title">{{ currentQuestion.title }}</h3>
+        <h3 class="question-title">{{ currentQuestion.content }}</h3>
         <div class="options-list">
           <div
             v-for="(opt, i) in parsedOptions"
@@ -19,7 +19,7 @@
             @click="selectOption(opt.score)"
           >
             <span class="option-label">{{ String.fromCharCode(65 + i) }}</span>
-            <span class="option-text">{{ opt.text }}</span>
+            <span class="option-text">{{ opt.label }}</span>
           </div>
         </div>
       </div>
