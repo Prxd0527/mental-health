@@ -9,10 +9,7 @@
         :default-active="currentRoute"
         :collapse="isCollapsed"
         router
-        class="aside-menu"
-        background-color="transparent"
-        text-color="#E8E4DF"
-        active-text-color="#5CB8A5"
+        class="aside-menu modern-menu"
       >
         <!-- 教师端菜单 -->
         <template v-if="authStore.isTeacher || authStore.isAdmin">
@@ -28,6 +25,10 @@
             <el-menu-item index="/teacher/chat">
               <el-icon><ChatDotRound /></el-icon>
               <span>在线咨询</span>
+            </el-menu-item>
+            <el-menu-item index="/teacher/articles">
+              <el-icon><EditPen /></el-icon>
+              <span>文章发表</span>
             </el-menu-item>
           </el-menu-item-group>
         </template>
@@ -104,7 +105,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import {
   Calendar, Tickets, ChatDotRound, DataAnalysis,
-  User, Document, Notebook, Warning, ArrowDown, Expand, Fold
+  User, Document, Notebook, Warning, ArrowDown, Expand, Fold, EditPen
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -132,11 +133,16 @@ function handleCommand(cmd) {
 }
 
 .admin-aside {
-  background: linear-gradient(180deg, #2C3E50 0%, #1a2332 100%);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 2px 0 16px rgba(0, 0, 0, 0.02);
   display: flex;
   flex-direction: column;
-  transition: width 0.3s ease;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+  z-index: 10;
 }
 
 .aside-logo {
@@ -146,19 +152,21 @@ function handleCommand(cmd) {
   justify-content: center;
   gap: 10px;
   cursor: pointer;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
   flex-shrink: 0;
 }
 
 .logo-icon {
   font-size: 24px;
+  filter: drop-shadow(0 2px 4px rgba(42, 157, 143, 0.2));
 }
 
 .logo-text {
   font-size: 18px;
-  font-weight: 700;
-  color: #fff;
+  font-weight: 800;
+  color: var(--color-text-primary);
   white-space: nowrap;
+  letter-spacing: -0.01em;
 }
 
 .aside-menu {
@@ -167,10 +175,37 @@ function handleCommand(cmd) {
   overflow-y: auto;
 }
 
-.aside-menu :deep(.el-menu-item-group__title) {
-  color: #6B7B8D;
+/* 现代化悬浮轻量菜单 */
+.modern-menu {
+  background: transparent;
+  padding: 12px 0;
+}
+.modern-menu :deep(.el-menu-item) {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  margin: 4px 12px;
+  border-radius: 12px;
+  height: 44px;
+  line-height: 44px;
+  transition: all var(--transition-fast);
+}
+.modern-menu :deep(.el-menu-item:hover) {
+  background-color: rgba(42, 157, 143, 0.06);
+  color: var(--color-primary);
+  transform: translateX(2px);
+}
+.modern-menu :deep(.el-menu-item.is-active) {
+  background: linear-gradient(135deg, rgba(42, 157, 143, 0.12), rgba(42, 157, 143, 0.04));
+  color: var(--color-primary-dark);
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(42, 157, 143, 0.1);
+}
+.modern-menu :deep(.el-menu-item-group__title) {
+  color: var(--color-text-muted);
   font-size: 12px;
-  padding-left: 20px;
+  font-weight: 600;
+  padding: 16px 20px 8px;
+  letter-spacing: 0.05em;
 }
 
 .aside-collapse-btn {
@@ -179,14 +214,16 @@ function handleCommand(cmd) {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #A0AEC0;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  transition: color 0.2s;
+  color: var(--color-text-muted);
+  border-top: 1px dashed rgba(0, 0, 0, 0.06);
+  transition: all var(--transition-fast);
   flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .aside-collapse-btn:hover {
-  color: #5CB8A5;
+  color: var(--color-primary);
+  background: rgba(42, 157, 143, 0.05);
 }
 
 .admin-header {
@@ -195,15 +232,19 @@ function handleCommand(cmd) {
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
-  background: #fff;
-  border-bottom: 1px solid var(--color-border-light);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.02);
+  z-index: 5;
 }
 
 .header-title {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-text-primary);
+  letter-spacing: -0.01em;
 }
 
 .user-dropdown {

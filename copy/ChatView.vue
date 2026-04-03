@@ -2,10 +2,10 @@
   <div class="chat-page">
     <div class="chat-sidebar">
       <h3 class="sidebar-title">会话列表</h3>
-      <div v-for="conv in conversations" :key="conv.targetId" class="conv-item" :class="{ active: activeTarget === conv.targetId }" @click="selectConversation(conv)">
-        <el-avatar :size="36">{{ (conv.targetName || '?').charAt(0) }}</el-avatar>
+      <div v-for="conv in conversations" :key="conv.userId" class="conv-item" :class="{ active: activeTarget === conv.userId }" @click="selectConversation(conv)">
+        <el-avatar :size="36">{{ (conv.username || '?').charAt(0) }}</el-avatar>
         <div class="conv-info">
-          <span class="conv-name">{{ conv.targetName || '用户' + conv.targetId }}</span>
+          <span class="conv-name">{{ conv.username || '用户' + conv.userId }}</span>
           <span class="conv-last">{{ conv.lastMessage || '' }}</span>
         </div>
       </div>
@@ -45,34 +45,51 @@ function connectWebSocket() {
   if (!authStore.userId) return
   const wsUrl = `ws://${window.location.host}/ws/chat/${authStore.userId}`
   ws = new WebSocket(wsUrl)
-  ws.onmessage = (event) => {
+  ws.onmessage = async (event) => {
     try {
       const msg = JSON.parse(event.data)
       if (msg.senderId === activeTarget.value || msg.receiverId === activeTarget.value) {
         messages.value.push(msg)
         scrollToBottom()
       }
+      
+      // 实时响应该消息，刷新侧边栏（会话列表与未读数）
+      const res = await getConversationList()
+      conversations.value = res.data || []
     } catch { /* ignore */ }
   }
   ws.onclose = () => { setTimeout(connectWebSocket, 3000) }
 }
 
 async function selectConversation(conv) {
-  activeTarget.value = conv.targetId
+  activeTarget.value = conv.userId
   try {
-    const res = await getChatHistory(conv.targetId)
+    const res = await getChatHistory(conv.userId)
     messages.value = res.data || []
     scrollToBottom()
   } catch { /* ignore */ }
 }
 
-function sendMessage() {
+async function sendMessage() {
   if (!inputMessage.value.trim() || !ws || ws.readyState !== WebSocket.OPEN) return
   const msg = { receiverId: activeTarget.value, content: inputMessage.value, type: 'TEXT' }
   ws.send(JSON.stringify(msg))
   messages.value.push({ senderId: authStore.userId, content: inputMessage.value, createTime: new Date().toISOString() })
+  
+  // 更新本地会话列表最新消息以实现秒回变化
+  const conv = conversations.value.find(c => c.userId === activeTarget.value)
+  if (conv) {
+    conv.lastMessage = inputMessage.value
+  }
+
   inputMessage.value = ''
   scrollToBottom()
+
+  // 异步同步最新状态
+  try {
+    const res = await getConversationList()
+    conversations.value = res.data || []
+  } catch { /* ignore */ }
 }
 
 function scrollToBottom() {

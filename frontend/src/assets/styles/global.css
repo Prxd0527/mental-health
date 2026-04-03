@@ -45,7 +45,7 @@
   --shadow-lg: 0 20px 40px -5px rgba(42, 157, 143, 0.12); /* 带有主色倾向的弥散阴影 */
   --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.04);
 
-  /* 玻璃拟物特效变量 */
+  /* 玻璃拟物特效变量 (深度沉浸版) */
   --glass-bg: rgba(255, 255, 255, 0.75);
   --glass-border: 1px solid rgba(255, 255, 255, 0.6);
   --glass-blur: blur(24px);
@@ -82,7 +82,6 @@
 
 html {
   font-size: 16px;
-  scroll-behavior: smooth;
 }
 
 body {
@@ -170,11 +169,11 @@ img {
 
 /* --- 页面切换动画 (优化缩放) --- */
 .fade-slide-enter-active {
-  transition: all var(--transition-normal);
+  transition: opacity var(--transition-normal), transform var(--transition-normal);
 }
 
 .fade-slide-leave-active {
-  transition: all 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .fade-slide-enter-from {
@@ -215,4 +214,88 @@ img {
   .section-title {
     font-size: 1.25rem;
   }
+}
+
+/* ============================================
+   组件全局玻璃化与现代视觉覆写 (Anti-Clunky)
+   ============================================ */
+
+/* 1. 按钮轻量化 (幽灵呼吸形态 - 水晶质感) */
+.el-button--primary {
+  background: rgba(42, 157, 143, 0.1) !important;
+  color: var(--color-primary-dark) !important;
+  border: 1px solid rgba(42, 157, 143, 0.25) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s, box-shadow 0.2s !important;
+}
+
+.el-button--primary:hover {
+  background: var(--color-primary) !important;
+  color: #ffffff !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 8px 24px rgba(42, 157, 143, 0.3) !important;
+  transform: translateY(-2px);
+}
+
+.el-button--primary.is-disabled {
+  background: rgba(42, 157, 143, 0.05) !important;
+  color: rgba(42, 157, 143, 0.4) !important;
+  border-color: transparent !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* 2. 弹窗纯净毛玻璃化 */
+.el-dialog {
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.el-dialog__header, .el-dialog__footer {
+  background: transparent !important;
+}
+
+/* 3. 消息提示胶囊化 */
+.el-message {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+  padding: 12px 20px !important;
+}
+
+/* 4. 分页器现代化与极简果冻风 */
+.el-pagination.is-background .btn-next,
+.el-pagination.is-background .btn-prev,
+.el-pagination.is-background .el-pager li {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: var(--color-text-secondary) !important;
+  border-radius: 8px !important;
+  min-width: 32px;
+  transition: all 0.3s ease;
+}
+
+.el-pagination.is-background .el-pager li:hover,
+.el-pagination.is-background .btn-next:hover,
+.el-pagination.is-background .btn-prev:hover {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  color: var(--color-primary-dark) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.el-pagination.is-background .el-pager li:not(.is-disabled).is-active {
+  background-color: var(--color-primary) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(42, 157, 143, 0.3) !important;
+  border-color: transparent;
 }

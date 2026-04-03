@@ -44,6 +44,16 @@ public class AdminController {
         return null;
     }
 
+    /**
+     * 权限校验：允许咨询师或管理员
+     */
+    private Result<String> checkTeacherOrAdmin() {
+        if (!SecurityUtils.isAdmin() && !SecurityUtils.isTeacher()) {
+            return Result.error(403, "无权限执行此操作");
+        }
+        return null;
+    }
+
     // ======================== 用户管理 ========================
 
     /**
@@ -155,7 +165,7 @@ public class AdminController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Integer status) {
 
-        Result<String> check = checkAdmin();
+        Result<String> check = checkTeacherOrAdmin();
         if (check != null)
             return Result.error(403, "无权限执行此操作");
 
@@ -176,7 +186,7 @@ public class AdminController {
      */
     @PostMapping("/article/save")
     public Result<String> saveOrUpdateArticle(@RequestBody Article article) {
-        Result<String> check = checkAdmin();
+        Result<String> check = checkTeacherOrAdmin();
         if (check != null)
             return check;
         articleService.saveOrUpdate(article);
@@ -188,7 +198,7 @@ public class AdminController {
      */
     @PostMapping("/article/{id}/status/{status}")
     public Result<String> updateArticleStatus(@PathVariable Long id, @PathVariable Integer status) {
-        Result<String> check = checkAdmin();
+        Result<String> check = checkTeacherOrAdmin();
         if (check != null)
             return check;
 
@@ -205,7 +215,7 @@ public class AdminController {
      */
     @DeleteMapping("/article/{id}")
     public Result<String> deleteArticle(@PathVariable Long id) {
-        Result<String> check = checkAdmin();
+        Result<String> check = checkTeacherOrAdmin();
         if (check != null)
             return check;
         articleService.removeById(id);

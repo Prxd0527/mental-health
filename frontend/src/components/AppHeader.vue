@@ -7,11 +7,11 @@
       </router-link>
 
       <nav class="header-nav" :class="{ 'nav-open': mobileMenuOpen }">
-        <router-link to="/" class="nav-link" @click="mobileMenuOpen = false">首页</router-link>
-        <router-link to="/articles" class="nav-link" @click="mobileMenuOpen = false">心理科普</router-link>
-        <router-link to="/treehole" class="nav-link" @click="mobileMenuOpen = false">树洞广场</router-link>
-        <router-link to="/quiz" class="nav-link" @click="mobileMenuOpen = false">心理测评</router-link>
-        <router-link to="/counselors" class="nav-link" @click="mobileMenuOpen = false">预约咨询</router-link>
+        <router-link to="/" class="nav-link" active-class="" exact-active-class="nav-active" @click="mobileMenuOpen = false">首页</router-link>
+        <router-link to="/articles" class="nav-link" active-class="nav-active" @click="mobileMenuOpen = false">心理科普</router-link>
+        <router-link to="/treehole" class="nav-link" active-class="nav-active" @click="mobileMenuOpen = false">树洞广场</router-link>
+        <router-link to="/quiz" class="nav-link" active-class="nav-active" @click="mobileMenuOpen = false">心理测评</router-link>
+        <router-link to="/counselors" class="nav-link" active-class="nav-active" @click="mobileMenuOpen = false">预约咨询</router-link>
       </nav>
 
       <div class="header-actions">
@@ -156,23 +156,43 @@ function handleCommand(cmd) {
 }
 
 .nav-link {
-  padding: 6px 14px;
-  border-radius: 8px;
+  position: relative;
+  padding: 8px 12px;
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
-  transition: all var(--transition-fast);
+  transition: all 0.3s ease;
   text-decoration: none;
+  background: transparent;
 }
 
 .nav-link:hover {
   color: var(--color-primary);
-  background: var(--color-primary-lighter);
+  background: rgba(42, 157, 143, 0.04);
+  border-radius: 8px;
 }
 
-.nav-link.router-link-active {
+.nav-link.nav-active {
   color: var(--color-primary);
-  background: var(--color-primary-lighter);
+  font-weight: 600;
+  background: transparent;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--color-primary);
+  transition: width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.nav-link.nav-active::after {
+  width: 18px;
 }
 
 .header-actions {

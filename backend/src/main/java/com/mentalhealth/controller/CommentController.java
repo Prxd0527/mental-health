@@ -75,4 +75,42 @@ public class CommentController {
         }
         return Result.error("点赞失败");
     }
+
+    /**
+     * 删除评论（仅评论作者、树洞作者或管理员可删除）
+     */
+    @DeleteMapping("/{id}")
+    public Result<String> deleteComment(@PathVariable Long id) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null)
+            return Result.error(401, "尚未登录");
+
+        Comment comment = commentService.getById(id);
+        if (comment == null) {
+            return Result.error("评论不存在");
+        }
+
+        boolean canDelete = SecurityUtils.isAdmin();
+        
+        // 如果是评论本人，可以删除
+        if (!canDelete && comment.getUserId().equals(userId)) {
+            canDelete = true;
+        }
+        
+        // 如果是该树洞的作者，也可以删除该树洞下的任意评论
+        if (!canDelete) {
+            com.mentalhealth.entity.Post post = com.mentalhealth.utils.SpringContextUtils.getBean(com.mentalhealth.service.PostService.class).getById(comment.getPostId());
+            if (post != null && post.getUserId().equals(userId)) {
+                canDelete = true;
+            }
+        }
+
+        if (!canDelete) {
+            return Result.error(403, "无权删除该评论");
+        }
+
+        comment.setStatus(0); // 逻辑删除
+        commentService.updateById(comment);
+        return Result.success("删除成功");
+    }
 }

@@ -130,6 +130,12 @@ const routes = [
         name: 'TeacherChat',
         component: () => import('@/views/chat/ChatView.vue'),
         meta: { title: '在线咨询' }
+      },
+      {
+        path: 'articles',
+        name: 'TeacherArticleManage',
+        component: () => import('@/views/admin/ArticleManage.vue'),
+        meta: { title: '文章发表' }
       }
     ]
   },

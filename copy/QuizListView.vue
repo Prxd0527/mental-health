@@ -10,7 +10,7 @@
         <p class="quiz-desc">{{ quiz.description }}</p>
         <div class="quiz-meta">
           <span>{{ quiz.questionCount || '—' }} 题</span>
-          <span>约 {{ quiz.estimatedMinutes || 5 }} 分钟</span>
+          <span>约 {{ Math.ceil((quiz.questionCount || 10) * 0.5) }} 分钟</span>
         </div>
         <el-button type="primary" round @click="startQuiz(quiz.id)">开始测评</el-button>
       </div>

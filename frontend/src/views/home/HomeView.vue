@@ -15,18 +15,16 @@
           匿名分享 · 专业测评 · 在线咨询
         </p>
         <div class="hero-actions">
-          <el-button type="primary" size="large" round @click="$router.push('/treehole')">
-            进入树洞广场
-          </el-button>
-          <el-button size="large" round @click="$router.push('/quiz')">
-            心理测评
-          </el-button>
+          <button class="explore-btn" @click="scrollToFeatures">
+            <span>开启探索之旅</span>
+            <i class="scroll-arrow">↓</i>
+          </button>
         </div>
       </div>
     </section>
 
     <!-- 功能入口卡片 -->
-    <section class="features-section container">
+    <section class="features-section container" id="features">
       <h2 class="section-title">核心功能</h2>
       <div class="features-grid">
         <div class="feature-card" @click="$router.push('/treehole')">
@@ -72,7 +70,7 @@
               <span class="meta-icon">❤️</span> {{ post.likes || 0 }}
             </span>
             <span class="meta-item">
-              <span class="meta-icon">👁️</span> {{ post.views || 0 }}
+              <span class="meta-icon">📖</span> {{ post.views || 0 }}
             </span>
           </div>
         </div>
@@ -100,7 +98,7 @@
             <h4 class="article-title">{{ article.title }}</h4>
             <div class="article-meta">
               <span>{{ article.category || '文章' }}</span>
-              <span>👁️ {{ article.views || 0 }}</span>
+              <span>📖 {{ article.views || 0 }}</span>
             </div>
           </div>
         </div>
@@ -117,6 +115,10 @@ import { getArticleList } from '@/api/article'
 
 const hotPosts = ref([])
 const latestArticles = ref([])
+
+function scrollToFeatures() {
+  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
+}
 
 onMounted(async () => {
   try {
@@ -211,6 +213,45 @@ onMounted(async () => {
   display: flex;
   justify-content: center;
   gap: 12px;
+  margin-top: 16px;
+}
+
+/* 新探索按钮样式 */
+.explore-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 30px;
+  color: var(--color-primary-dark);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 32px rgba(42, 157, 143, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.explore-btn:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 40px rgba(42, 157, 143, 0.2);
+}
+
+.scroll-arrow {
+  font-style: normal;
+  font-size: 18px;
+  font-weight: 700;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(4px); }
+  60% { transform: translateY(2px); }
 }
 
 /* Features */

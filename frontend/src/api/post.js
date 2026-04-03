@@ -27,3 +27,10 @@ export function publishPost(data) {
 export function likePost(id) {
   return request.post(`/post/${id}/like`)
 }
+
+/**
+ * 删除树洞
+ */
+export function deletePost(id) {
+  return request.delete(`/post/${id}`)
+}

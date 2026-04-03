@@ -27,3 +27,10 @@ export function publishComment(data) {
 export function likeComment(id) {
   return request.post(`/comment/${id}/like`)
 }
+
+/**
+ * 删除评论
+ */
+export function deleteComment(id) {
+  return request.delete(`/comment/${id}`)
+}

@@ -19,7 +19,9 @@ public class Article {
     private String coverImage;
     private String category;
     private Integer views;
-    private Integer status; // 0-隐藏/草稿, 1-发布
+    private Integer status; // 0-待审核/草稿, 1-已发布
+
+    private Long authorId; // 投稿人ID（咨询师或管理员）
 
     private LocalDateTime createTime;
 }

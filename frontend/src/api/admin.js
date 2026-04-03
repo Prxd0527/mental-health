@@ -39,3 +39,16 @@ export function getArticleManageList(params) {
 export function getQuizManageList(params) {
   return request.get('/admin/quiz/list', { params })
 }
+
+// ---- 题目管理 ----
+export function getQuizQuestions(quizId) {
+  return request.get(`/admin/quiz/${quizId}/questions`)
+}
+
+export function saveQuestion(data) {
+  return request.post('/admin/question/save', data)
+}
+
+export function deleteQuestion(id) {
+  return request.delete(`/admin/question/${id}`)
+}

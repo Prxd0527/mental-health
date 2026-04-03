@@ -1,26 +1,27 @@
 <template>
   <div class="auth-page">
-    <div class="auth-container">
-      <!-- 左侧装饰 -->
+    <!-- 动态发光背景 -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="auth-container glass-panel">
+      <!-- 左侧装饰 (使用渐变加柔滑背景) -->
       <div class="auth-illustration">
         <div class="illustration-content">
-          <div class="illustration-icon">🌱</div>
+          <div class="illustration-icon">✨</div>
           <h2>心灵树洞</h2>
-          <p>一个安全、温暖的心理健康平台<br/>用心倾听每一个声音</p>
-          <div class="floating-shapes">
-            <span class="shape shape-1">🍃</span>
-            <span class="shape shape-2">🌸</span>
-            <span class="shape shape-3">☁️</span>
-            <span class="shape shape-4">🦋</span>
-          </div>
+          <p>遇见更真实的自己<br/>发现生活中的小确幸</p>
         </div>
       </div>
 
       <!-- 右侧登录表单 -->
       <div class="auth-form-wrapper">
         <div class="auth-form-inner">
-          <h1 class="form-title">欢迎回来</h1>
-          <p class="form-subtitle">登录你的账号，开始心灵之旅</p>
+          <div class="form-header">
+            <h1 class="form-title">欢迎回来</h1>
+            <p class="form-subtitle">期待与你相遇，开始心灵之旅</p>
+          </div>
 
           <el-form
             ref="loginFormRef"
@@ -28,6 +29,7 @@
             :rules="rules"
             size="large"
             @submit.prevent="handleLogin"
+            class="custom-form"
           >
             <el-form-item prop="username">
               <el-input
@@ -64,7 +66,7 @@
 
           <div class="form-footer">
             还没有账号？
-            <router-link to="/register" class="link-register">立即注册</router-link>
+            <router-link to="/register" class="link-register">创造新连接</router-link>
           </div>
         </div>
       </div>
@@ -95,10 +97,10 @@ const loginForm = reactive({
 })
 
 const rules = {
-  username: [{ required: true, message: '请输入学号或邮箱', trigger: 'blur' }],
+  username: [{ required: true, message: '请输入学号/邮箱', trigger: 'blur' }],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码至少 6 位', trigger: 'blur' }
+    { min: 6, message: '最少 6 位', trigger: 'blur' }
   ]
 }
 
@@ -114,16 +116,15 @@ async function handleLogin() {
       realName: res.data.realName || '',
       avatar: res.data.avatar || ''
     })
-    ElMessage.success('登录成功！')
+    ElMessage.success('欢迎回来！')
 
-    // 检查是否已同意隐私协议
     if (!authStore.hasAgreedPrivacy) {
       privacyRef.value?.open()
     } else {
       navigateAfterLogin()
     }
   } catch (e) {
-    // 错误已被 Axios 拦截器处理
+    // 拦截器处理错误
   } finally {
     loading.value = false
   }
@@ -146,85 +147,118 @@ function navigateAfterLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-bg);
-  padding: 20px;
+  background-color: #f7f9fc;
+  position: relative;
+  overflow: hidden;
+  padding: 24px;
+}
+
+/* 动态发光背景效果 */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.6;
+  z-index: 0;
+  animation: blobFloat 12s infinite alternate ease-in-out;
+}
+
+.blob-1 {
+  width: 400px;
+  height: 400px;
+  background: var(--color-primary-light);
+  top: -100px;
+  left: -100px;
+  animation-delay: 0s;
+}
+
+.blob-2 {
+  width: 500px;
+  height: 500px;
+  background: var(--color-accent-purple);
+  bottom: -200px;
+  right: -100px;
+  animation-delay: -3s;
+}
+
+.blob-3 {
+  width: 300px;
+  height: 300px;
+  background: var(--color-accent-orange);
+  top: 30%;
+  left: 40%;
+  animation-duration: 15s;
+  animation-delay: -5s;
+  opacity: 0.4;
+}
+
+@keyframes blobFloat {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -50px) scale(1.1); }
+  100% { transform: translate(-20px, 20px) scale(0.9); }
 }
 
 .auth-container {
   display: flex;
   max-width: 900px;
   width: 100%;
-  border-radius: var(--radius-xl);
+  z-index: 10;
   overflow: hidden;
-  box-shadow: var(--shadow-lg);
-  background: #fff;
-  min-height: 500px;
+  min-height: 540px;
+  /* 玻璃拟物通过全局 .glass-panel 提供，移除白色硬底色 */
+  padding: 0;
 }
 
 /* --- 左侧装饰面板 --- */
 .auth-illustration {
   flex: 1;
-  background: linear-gradient(135deg, #5CB8A5 0%, #3D9E8B 50%, #B8A9C9 100%);
+  background: linear-gradient(135deg, rgba(42, 157, 143, 0.9) 0%, rgba(33, 131, 118, 0.95) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
+  color: #fff;
+}
+
+.auth-illustration::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiPjwvcmVjdD4KPHBhdGggZD0iTTAgMEw4IDhaTTAgOEw4IDBaIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiPjwvcGF0aD4KPC9zdmc+') repeat;
+  opacity: 0.3;
 }
 
 .illustration-content {
   text-align: center;
-  color: #fff;
   z-index: 1;
   padding: 40px;
+  position: relative;
 }
 
 .illustration-icon {
-  font-size: 64px;
-  margin-bottom: 16px;
-  animation: float 3s ease-in-out infinite;
+  font-size: 72px;
+  margin-bottom: 24px;
+  animation: float 4s var(--transition-spring) infinite;
 }
 
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-15px); }
 }
 
 .illustration-content h2 {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
 }
 
 .illustration-content p {
-  font-size: 14px;
+  font-size: 15px;
   opacity: 0.9;
   line-height: 1.8;
-}
-
-.floating-shapes {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.shape {
-  position: absolute;
-  font-size: 24px;
-  opacity: 0.3;
-  animation: drift 6s ease-in-out infinite;
-}
-
-.shape-1 { top: 15%; left: 10%; animation-delay: 0s; }
-.shape-2 { top: 60%; right: 15%; animation-delay: 1.5s; }
-.shape-3 { bottom: 20%; left: 20%; animation-delay: 3s; }
-.shape-4 { top: 30%; right: 25%; animation-delay: 4.5s; }
-
-@keyframes drift {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  25% { transform: translate(10px, -15px) rotate(5deg); }
-  50% { transform: translate(-5px, 10px) rotate(-3deg); }
-  75% { transform: translate(8px, 5px) rotate(2deg); }
+  font-weight: 300;
 }
 
 /* --- 右侧表单区域 --- */
@@ -241,29 +275,58 @@ function navigateAfterLogin() {
   max-width: 340px;
 }
 
+.form-header {
+  margin-bottom: 40px;
+}
+
 .form-title {
   font-size: 28px;
   font-weight: 700;
   color: var(--color-text-primary);
   margin-bottom: 8px;
+  letter-spacing: -0.02em;
 }
 
 .form-subtitle {
-  color: var(--color-text-muted);
-  font-size: 14px;
-  margin-bottom: 32px;
+  color: var(--color-text-secondary);
+  font-size: 15px;
+}
+
+.custom-form :deep(.el-input__wrapper) {
+  border-radius: 12px;
+  padding: 4px 12px;
+  box-shadow: 0 0 0 1px var(--color-border) inset;
+  background-color: rgba(255, 255, 255, 0.6);
+  transition: all var(--transition-fast);
+}
+
+.custom-form :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px var(--color-primary) inset;
+  background-color: #fff;
+}
+
+.custom-form :deep(.el-input__inner) {
+  height: 40px;
 }
 
 .submit-btn {
   width: 100%;
-  height: 44px;
+  height: 48px;
   font-size: 16px;
   font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(42, 157, 143, 0.3);
+  margin-top: 12px;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(42, 157, 143, 0.4);
 }
 
 .form-footer {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 24px;
   color: var(--color-text-muted);
   font-size: 14px;
 }
@@ -271,6 +334,7 @@ function navigateAfterLogin() {
 .link-register {
   color: var(--color-primary);
   font-weight: 600;
+  margin-left: 4px;
 }
 
 @media (max-width: 768px) {
