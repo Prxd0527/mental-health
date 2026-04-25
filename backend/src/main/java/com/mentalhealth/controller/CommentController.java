@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mentalhealth.common.Result;
 import com.mentalhealth.entity.Comment;
+import com.mentalhealth.entity.Post;
 import com.mentalhealth.service.CommentService;
+import com.mentalhealth.service.PostService;
 import com.mentalhealth.utils.SecurityUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +19,9 @@ public class CommentController {
 
     @Resource
     private CommentService commentService;
+
+    @Resource
+    private PostService postService;
 
     /**
      * 发布评论（需登录，自动 DFA 过滤）
@@ -99,7 +104,7 @@ public class CommentController {
         
         // 如果是该树洞的作者，也可以删除该树洞下的任意评论
         if (!canDelete) {
-            com.mentalhealth.entity.Post post = com.mentalhealth.utils.SpringContextUtils.getBean(com.mentalhealth.service.PostService.class).getById(comment.getPostId());
+            Post post = postService.getById(comment.getPostId());
             if (post != null && post.getUserId().equals(userId)) {
                 canDelete = true;
             }

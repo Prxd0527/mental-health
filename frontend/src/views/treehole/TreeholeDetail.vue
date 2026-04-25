@@ -33,7 +33,7 @@
       </div>
       
       <div class="post-stats">
-        <div style="display:flex;">
+        <div style="display:flex; align-items:center; gap: 24px;">
           <span class="stat-item" @click="handleLike" :class="{ liked: post.hasLiked }">
             <i class="emoji">❤️</i> {{ post.likes || 0 }} 暖心
           </span>
@@ -41,13 +41,13 @@
             <i class="emoji">📖</i> {{ post.views || 0 }} 擦肩而过
           </span>
         </div>
-        <div style="display:flex; align-items:center;">
+        <div style="display:flex; align-items:center; gap: 20px;">
           <el-button 
             v-if="authStore.isAdmin || authStore.userId === post.userId" 
             type="danger" 
             link 
             @click.stop="handleDeletePost"
-            style="margin-right: 16px; font-size: 13px;"
+            style="font-size: 13px; margin: 0;"
           >
             删除树洞
           </el-button>
@@ -175,7 +175,8 @@ async function fetchPost() {
 async function fetchComments() {
   try {
     const res = await getComments(route.params.id)
-    comments.value = res.data || []
+    // 后端返回的是 Page 对象，实际数据数组在 records 中
+    comments.value = res.data?.records || res.data || []
   } catch (e) { /* ignore */ }
 }
 

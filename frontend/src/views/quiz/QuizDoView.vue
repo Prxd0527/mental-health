@@ -28,11 +28,11 @@
               v-for="(opt, i) in parsedOptions"
               :key="i"
               class="option-item"
-              :class="{ selected: answers[currentQuestion.id] === opt.score }"
-              @click="selectOption(opt.score)"
+              :class="{ selected: selectedIndices[currentQuestion.id] === i }"
+              @click="selectOption(i, opt.score)"
             >
               <div class="option-check">
-                <i class="el-icon-check" v-if="answers[currentQuestion.id] === opt.score">✓</i>
+                <i class="el-icon-check" v-if="selectedIndices[currentQuestion.id] === i">✓</i>
                 <span v-else>{{ String.fromCharCode(65 + i) }}</span>
               </div>
               <span class="option-text">{{ opt.label }}</span>
@@ -105,6 +105,7 @@ const quizId = route.params.id
 const questions = ref([])
 const currentIndex = ref(0)
 const answers = ref({})
+const selectedIndices = ref({}) // 新增：专门用于记录UI选中项的索引 (解藕了拥有冗余分数分值的判断)
 const submitting = ref(false)
 
 const currentQuestion = computed(() => questions.value[currentIndex.value] || {})
@@ -123,13 +124,17 @@ const parsedOptions = computed(() => {
   } catch { return [] }
 })
 
-function selectOption(score) {
+function selectOption(index, score) {
+  // UI 高亮锁定索引
+  selectedIndices.value[currentQuestion.value.id] = index
+  // 数据底座绑定具体分值
   answers.value[currentQuestion.value.id] = score
+  
   // UX Optimization: 自动跳转下一题 (如果不是最后一题)
   if (currentIndex.value < questions.value.length - 1) {
     setTimeout(() => {
       // 防止用户反悔快速切题时的冲突，做个安全检查
-      if (answers.value[currentQuestion.value.id] === score) {
+      if (selectedIndices.value[currentQuestion.value.id] === index) {
         nextQuestion()
       }
     }, 400)

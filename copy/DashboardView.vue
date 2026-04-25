@@ -20,18 +20,18 @@ import { getDashboardStats } from '@/api/admin'
 const stats = ref([
   { icon: '👤', label: '用户总数', value: '—', bg: 'linear-gradient(135deg,#5CB8A5,#7ECFBF)' },
   { icon: '🌳', label: '树洞总数', value: '—', bg: 'linear-gradient(135deg,#B8A9C9,#D4C5E2)' },
-  { icon: '📊', label: '测评次数', value: '—', bg: 'linear-gradient(135deg,#E8A87C,#F0C8A8)' },
-  { icon: '📅', label: '预约总数', value: '—', bg: 'linear-gradient(135deg,#7EB8D4,#A8D8EA)' },
+  { icon: '📰', label: '文章总数', value: '—', bg: 'linear-gradient(135deg,#E8A87C,#F0C8A8)' },
+  { icon: '📊', label: '量表总数', value: '—', bg: 'linear-gradient(135deg,#7EB8D4,#A8D8EA)' },
 ])
 
 onMounted(async () => {
   try {
     const r = await getDashboardStats()
     if (r.data) {
-      stats.value[0].value = r.data.userCount ?? '—'
-      stats.value[1].value = r.data.postCount ?? '—'
-      stats.value[2].value = r.data.quizResultCount ?? '—'
-      stats.value[3].value = r.data.appointmentCount ?? '—'
+      stats.value[0].value = r.data.totalUsers ?? '—'
+      stats.value[1].value = r.data.totalPosts ?? '—'
+      stats.value[2].value = r.data.totalArticles ?? '—'
+      stats.value[3].value = r.data.totalQuizzes ?? '—'
     }
   } catch { /* ignore */ }
 })

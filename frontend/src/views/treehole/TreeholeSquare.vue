@@ -95,7 +95,7 @@
         </div>
         
         <div class="post-actions">
-          <div class="actions-left">
+          <div class="actions-left" style="display:flex; align-items:center; gap: 24px;">
             <span class="action-item like-btn" @click.stop="handleLike(post)" :class="{ liked: post.hasLiked }">
               <i class="emoji">❤️</i> {{ post.likes || 0 }}
             </span>
@@ -106,7 +106,7 @@
               <i class="emoji">📖</i> {{ post.views || 0 }}
             </span>
           </div>
-          <div class="actions-right" style="display:flex; align-items:center;">
+          <div class="actions-right" style="display:flex; align-items:center; gap: 20px;">
             <el-button 
               v-if="authStore.isAdmin || authStore.userId === post.userId" 
               type="danger" 

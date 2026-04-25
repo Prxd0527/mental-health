@@ -399,13 +399,99 @@ public class AdminController {
             return Result.error(403, "无权限执行此操作");
 
         Map<String, Object> stats = new java.util.HashMap<>();
-        stats.put("totalUsers", userService.count());
-        stats.put("totalStudents", userService.count(new LambdaQueryWrapper<User>().eq(User::getRole, "STUDENT")));
-        stats.put("totalTeachers", userService.count(new LambdaQueryWrapper<User>().eq(User::getRole, "TEACHER")));
-        stats.put("totalPosts", postService.count());
-        stats.put("totalArticles", articleService.count());
-        stats.put("totalQuizzes", quizService.count());
-        stats.put("totalComments", commentService.count());
+
+        // ---- 基础计数 ----
+        long totalUsers = userService.count();
+        long totalStudents = userService.count(new LambdaQueryWrapper<User>().eq(User::getRole, "STUDENT"));
+        long totalTeachers = userService.count(new LambdaQueryWrapper<User>().eq(User::getRole, "TEACHER"));
+        long totalPosts = postService.count();
+        long totalArticles = articleService.count();
+        long totalQuizzes = quizService.count();
+        long totalComments = commentService.count();
+
+        stats.put("totalUsers", totalUsers);
+        stats.put("totalStudents", totalStudents);
+        stats.put("totalTeachers", totalTeachers);
+        stats.put("totalPosts", totalPosts);
+        stats.put("totalArticles", totalArticles);
+        stats.put("totalQuizzes", totalQuizzes);
+        stats.put("totalComments", totalComments);
+
+        // ---- 用户角色分布（饼图数据） ----
+        long totalAdmins = userService.count(new LambdaQueryWrapper<User>().eq(User::getRole, "ADMIN"));
+        java.util.List<Map<String, Object>> roleDist = new java.util.ArrayList<>();
+        roleDist.add(Map.of("name", "学生", "value", totalStudents));
+        roleDist.add(Map.of("name", "咨询师", "value", totalTeachers));
+        roleDist.add(Map.of("name", "管理员", "value", totalAdmins));
+        stats.put("roleDistribution", roleDist);
+
+        // ---- 最近7天注册趋势（折线图数据） ----
+        java.util.List<Map<String, Object>> regTrend = new java.util.ArrayList<>();
+        java.time.LocalDate today = java.time.LocalDate.now();
+        for (int i = 6; i >= 0; i--) {
+            java.time.LocalDate day = today.minusDays(i);
+            java.time.LocalDateTime start = day.atStartOfDay();
+            java.time.LocalDateTime end = day.plusDays(1).atStartOfDay();
+            long count = userService.count(new LambdaQueryWrapper<User>()
+                    .ge(User::getCreateTime, start)
+                    .lt(User::getCreateTime, end));
+            regTrend.add(Map.of(
+                    "date", day.toString(),
+                    "count", count
+            ));
+        }
+        stats.put("registrationTrend", regTrend);
+
+        // ---- 最近7天发帖趋势（柱状图数据） ----
+        java.util.List<Map<String, Object>> postTrend = new java.util.ArrayList<>();
+        for (int i = 6; i >= 0; i--) {
+            java.time.LocalDate day = today.minusDays(i);
+            java.time.LocalDateTime start = day.atStartOfDay();
+            java.time.LocalDateTime end = day.plusDays(1).atStartOfDay();
+            long count = postService.count(new LambdaQueryWrapper<Post>()
+                    .ge(Post::getCreateTime, start)
+                    .lt(Post::getCreateTime, end));
+            postTrend.add(Map.of(
+                    "date", day.toString(),
+                    "count", count
+            ));
+        }
+        stats.put("postTrend", postTrend);
+
+        // ---- 最近数据动态（最新5条） ----
+        java.util.List<Map<String, Object>> recentActivities = new java.util.ArrayList<>();
+
+        // 最新注册用户
+        java.util.List<User> recentUsers = userService.list(new LambdaQueryWrapper<User>()
+                .orderByDesc(User::getCreateTime).last("LIMIT 3"));
+        for (User u : recentUsers) {
+            recentActivities.add(Map.of(
+                    "type", "注册",
+                    "content", (u.getRealName() != null ? u.getRealName() : u.getUsername()) + " 注册了账号",
+                    "time", u.getCreateTime() != null ? u.getCreateTime().toString() : ""
+            ));
+        }
+
+        // 最新树洞
+        java.util.List<Post> recentPosts = postService.list(new LambdaQueryWrapper<Post>()
+                .orderByDesc(Post::getCreateTime).last("LIMIT 3"));
+        for (Post p : recentPosts) {
+            String title = p.getContent() != null && p.getContent().length() > 20
+                    ? p.getContent().substring(0, 20) + "..." : (p.getContent() != null ? p.getContent() : "");
+            recentActivities.add(Map.of(
+                    "type", "树洞",
+                    "content", "新树洞: " + title,
+                    "time", p.getCreateTime() != null ? p.getCreateTime().toString() : ""
+            ));
+        }
+
+        // 按时间排序取最近6条
+        recentActivities.sort((a, b) -> b.get("time").toString().compareTo(a.get("time").toString()));
+        if (recentActivities.size() > 6) {
+            recentActivities = recentActivities.subList(0, 6);
+        }
+        stats.put("recentActivities", recentActivities);
+
         return Result.success(stats);
     }
 }
