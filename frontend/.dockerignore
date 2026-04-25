@@ -1,0 +1,5 @@
+# 前端 .dockerignore - 排除不需要进入镜像的文件
+node_modules/
+dist/
+copy/
+.git/

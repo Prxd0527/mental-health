@@ -1,0 +1,8 @@
+# 后端 .dockerignore - 排除不需要进入镜像的文件
+target/
+copy/
+uploads/
+*.log
+.idea/
+*.iml
+.git/
