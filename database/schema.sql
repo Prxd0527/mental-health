@@ -9,7 +9,7 @@ CREATE TABLE `user` (
   `password` VARCHAR(255) NOT NULL COMMENT '密码(加密)',
   `email` VARCHAR(100) DEFAULT NULL COMMENT '邮箱',
   `real_name` VARCHAR(50) DEFAULT NULL COMMENT '真实姓名',
-  `avatar` VARCHAR(255) DEFAULT NULL COMMENT '头像URL',
+  `avatar` LONGTEXT DEFAULT NULL COMMENT '头像(Base64 Data URL)',
   `role` VARCHAR(20) NOT NULL DEFAULT 'STUDENT' COMMENT '角色: STUDENT-学生, TEACHER-咨询师, ADMIN-管理员',
   `gender` TINYINT(1) DEFAULT NULL COMMENT '性别: 0-女, 1-男, 2-未知',
   `intro` TEXT DEFAULT NULL COMMENT '简介(咨询师展示用)',

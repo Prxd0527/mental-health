@@ -85,12 +85,15 @@ const mobileMenuOpen = ref(false)
 // 显示名称：优先昵称，fallback 到用户名
 const displayName = computed(() => authStore.userInfo?.realName || authStore.username)
 
-// 头像 URL：兼容完整路径和纯文件名
+// 头像 URL：兼容 Base64 Data URL、完整路径和旧版文件路径
 const headerAvatarUrl = computed(() => {
   const av = authStore.userInfo?.avatar
   if (!av) return ''
-  if (av.startsWith('/uploads/') || av.startsWith('http')) return av
-  return `/uploads/${av}`
+  // Base64 Data URL 或 http 链接直接使用
+  if (av.startsWith('data:') || av.startsWith('http')) return av
+  // 兼容旧版磁盘路径
+  if (av.startsWith('/uploads/')) return av
+  return av
 })
 
 function handleCommand(cmd) {

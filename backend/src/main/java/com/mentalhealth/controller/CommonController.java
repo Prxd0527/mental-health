@@ -2,60 +2,58 @@ package com.mentalhealth.controller;
 
 import com.mentalhealth.common.Result;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.UUID;
+import java.util.Base64;
 
+/**
+ * 通用文件上传控制器
+ * 将上传的图片转换为 Base64 Data URL 返回给前端，
+ * 由前端存入用户资料字段（存储在数据库中），不再写入磁盘文件。
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/common")
 public class CommonController {
 
-    // 这里通常配置在 yml 中，作为文件保存物理地址
-    // 简单起见，这里放在项目根目录下的 uploads 文件夹
-    private final String uploadPath = System.getProperty("user.dir") + "/uploads/";
-
+    /**
+     * 上传图片：接收 multipart 文件，转为 Base64 Data URL 返回
+     * 返回格式：data:image/png;base64,iVBORw0KGgoAAAANS...
+     */
     @PostMapping("/upload")
     public Result<String> upload(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
             return Result.error("文件为空");
         }
 
+        // 限制文件大小为 2MB（Base64 编码后体积会膨胀约 33%）
+        if (file.getSize() > 2 * 1024 * 1024) {
+            return Result.error("图片大小不能超过 2MB");
+        }
+
         try {
-            // 确保目录存在
-            File targetDir = new File(uploadPath);
-            if (!targetDir.exists() && !targetDir.mkdirs()) {
-                log.error("创建上传目录失败: {}", uploadPath);
-                return Result.error("文件上传失败，服务器配置异常");
+            // 获取 MIME 类型（如 image/png、image/jpeg）
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                return Result.error("仅支持图片格式文件");
             }
 
-            // 获取原文件名及后缀
-            String originalFilename = file.getOriginalFilename();
-            String suffix = originalFilename != null ? originalFilename.substring(originalFilename.lastIndexOf("."))
-                    : ".jpg";
+            // 将文件字节转为 Base64 编码
+            byte[] bytes = file.getBytes();
+            String base64 = Base64.getEncoder().encodeToString(bytes);
 
-            // 生成唯一文件名
-            String newFilename = UUID.randomUUID().toString() + suffix;
+            // 拼接 Data URL 格式
+            String dataUrl = "data:" + contentType + ";base64," + base64;
 
-            // 保存文件
-            File destFile = new File(uploadPath + newFilename);
-            file.transferTo(destFile);
-
-            // 实际项目中应返回 OSS/CDN 的网络地址或文件在服务器对应的相对路由
-            // 这里暂且返回通过特定静态资源映射暴露出来的路径字符串
-            String fileUrl = "/uploads/" + newFilename;
-
-            return Result.success(fileUrl);
-        } catch (IOException e) {
-            log.error("文件上传失败", e);
-            return Result.error("上传错误: " + e.getMessage());
+            log.info("图片上传成功，Base64 长度: {} 字符", dataUrl.length());
+            return Result.success(dataUrl);
+        } catch (Exception e) {
+            log.error("文件转 Base64 失败", e);
+            return Result.error("上传处理失败: " + e.getMessage());
         }
     }
 }

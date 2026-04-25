@@ -1,21 +1,13 @@
 package com.mentalhealth.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * Web MVC 配置
- * 映射 /uploads/** 到本地磁盘目录，使上传的文件可通过 URL 访问
+ * 头像已改为 Base64 存储在数据库中，不再需要磁盘静态资源映射
  */
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
-
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 将 /uploads/ URL 前缀映射到项目运行目录下的 uploads 文件夹
-        String uploadPath = System.getProperty("user.dir") + "/uploads/";
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + uploadPath);
-    }
+    // 如需其他静态资源映射可在此添加
 }

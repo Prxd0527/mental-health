@@ -178,8 +178,11 @@ const profileForm = reactive({
 
 const avatarUrl = computed(() => {
   if (!profileForm.avatar) return ''
-  if (profileForm.avatar.startsWith('/uploads/') || profileForm.avatar.startsWith('http')) return profileForm.avatar
-  return `/uploads/${profileForm.avatar}`
+  // Base64 Data URL 或 http 链接直接使用
+  if (profileForm.avatar.startsWith('data:') || profileForm.avatar.startsWith('http')) return profileForm.avatar
+  // 兼容旧版磁盘路径
+  if (profileForm.avatar.startsWith('/uploads/')) return profileForm.avatar
+  return profileForm.avatar
 })
 
 async function loadProfile() {
